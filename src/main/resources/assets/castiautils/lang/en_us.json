@@ -1,0 +1,23 @@
+{
+  "text.autoconfig.castiautils.title": "Crafters Castia Utils Configuration",
+  "text.autoconfig.castiautils.category.adblock": "Adblock",
+  "text.autoconfig.castiautils.option.voteMessage": "Vote messages",
+  "text.autoconfig.castiautils.option.voteMessage.@Tooltip": "Player has voted for cool rewards /vote",
+  "text.autoconfig.castiautils.option.joinMessage": "Join messages",
+  "text.autoconfig.castiautils.option.leaveMessage": "Leave messages",
+  "text.autoconfig.castiautils.option.firstJoinMessage": "First join messages",
+  "text.autoconfig.castiautils.option.firstJoinMessage.@Tooltip": "Player joined for the first time! (#XXXX)",
+  "text.autoconfig.castiautils.option.rankupMessage": "Rankup messages",
+  "text.autoconfig.castiautils.option.rankupMessage.@Tooltip": "Player ranked up to Rank!",
+  "text.autoconfig.castiautils.option.ressourcePackMessage": "Ressource pack message",
+  "text.autoconfig.castiautils.option.ressourcePackMessage.@Tooltip": "The message you get after you join",
+  "text.autoconfig.castiautils.option.deathMessage": "Death messages",
+  "text.autoconfig.castiautils.option.afkEnterMessage": "AFK start message",
+  "text.autoconfig.castiautils.option.afkEnterMessage.@Tooltip": "You are now AFK.",
+  "text.autoconfig.castiautils.option.afkEndMessage": "AFK end message",
+  "text.autoconfig.castiautils.option.afkEndMessage.@Tooltip": "You are no longer AFK.",
+  "text.autoconfig.castiautils.option.showcaseMessage": "Showcase messages",
+  "text.autoconfig.castiautils.option.chatMessage": "Chat messages",
+  "text.autoconfig.castiautils.option.emptyLines": "Empty Messages",
+  "text.autoconfig.castiautils.option.emptyLines.@Tooltip": "Advertisements often have empty lines before and after them."
+}
