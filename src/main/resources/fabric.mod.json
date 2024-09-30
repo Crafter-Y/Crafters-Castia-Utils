@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "castiautils",
+  "version": "${version}",
+  "name": "Crafters Castia Utils",
+  "description": "",
+  "authors": ["Crafter_Y"],
+  "contact": {
+    "email": "mrcrafter.yt1@gmail.com"
+  },
+  "license": "All-Rights-Reserved",
+  "environment": "client",
+  "entrypoints": {
+    "main": [
+      "de.craftery.castiautils.CastiaUtils"
+    ]
+  },
+  "mixins": [
+    "castiautils.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "fabric": "*",
+    "minecraft": "${minecraft_version}"
+  }
+}
