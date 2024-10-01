@@ -8,8 +8,11 @@ import net.minecraft.text.ClickEvent;
 import net.minecraft.text.Text;
 
 public class Adblocker {
+
     public static void register() {
         ClientReceiveMessageEvents.ALLOW_GAME.register((message, overlay) -> {
+            if (overlay) return true;
+
             CastiaConfig config = AutoConfig.getConfigHolder(CastiaConfig.class).getConfig();
 
             if (handleChatMessage(message)) {
@@ -36,6 +39,16 @@ public class Adblocker {
                 return config.showcaseMessage;
             } else if (handleEmptyLine(message)) {
                 return config.emptyLines;
+            } else if (handleTips(message)) {
+                return config.tips;
+            } else if (handleVoteStreakMessage(message)) {
+                return config.voteStreakMessage;
+            } else if (handleVoteReminderMessages(message)) {
+                return config.voteReminderMessage;
+            } else if (handleStoreAdvertisementMessages(message)) {
+                return config.storeAdvertisements;
+            } else if (handleFoundItemMessage(message)) {
+                return config.playerFoundMessage;
             } else {
                 CastiaUtils.LOGGER.info(message);
             }
@@ -117,5 +130,89 @@ public class Adblocker {
     private static boolean handleEmptyLine(Text message) {
         if (!message.getSiblings().isEmpty()) return false;
         return message.getString().isEmpty();
+    }
+
+    private static boolean handleTips(Text message) {
+        if (message.getSiblings().size() != 1) return false;
+        if (message.getSiblings().get(0).getSiblings().size() != 3) return false;
+        return message.getSiblings().get(0).getSiblings().get(0).getString().equals("Tip:");
+    }
+
+    private static boolean handleVoteStreakMessage(Text message) {
+        if (message.getSiblings().size() != 1) return false;
+        if (message.getSiblings().get(0).getSiblings().size() != 1) return false;
+        return message.getSiblings().get(0).getSiblings().get(0).getString().startsWith("has voted ");
+    }
+
+    private static boolean isChatImage(Text message) {
+        if (!message.getSiblings().isEmpty()) return false;
+        if (message.getString().length() != 1) return false;
+        int charCode = message.getString().charAt(0);
+        CastiaUtils.LOGGER.info(charCode);
+        return switch (charCode) {
+            case 57505: yield true; // Wumpus (hidden because message is broken otherwise
+            default: yield false;
+        };
+    }
+
+    private static boolean isNotVotedRecentlyMessage(Text message) {
+        if (message.getSiblings().size() != 1) return false;
+        return message.getSiblings().get(0).getString().equals("You have not voted recently:");
+    }
+
+    private static boolean isCurrentVoteMessage(Text message) {
+        return message.getString().equals("                You currently have ");
+    }
+
+    private static boolean isPleaseVoteMessage(Text message) {
+        if (message.getSiblings().size() != 1) return false;
+        return message.getSiblings().get(0).getString().equals("/vote ");
+    }
+
+    private static boolean isVoteToHideThisMessageMessage(Text message) {
+        if (message.getSiblings().size() != 1) return false;
+        return message.getSiblings().get(0).getString().equals("Vote to hide this message...");
+    }
+
+    private static boolean handleVoteReminderMessages(Text message) {
+        return isChatImage(message) ||
+                isNotVotedRecentlyMessage(message) ||
+                isCurrentVoteMessage(message) ||
+                isPleaseVoteMessage(message) ||
+                isVoteToHideThisMessageMessage(message);
+    }
+
+    private static boolean isShoutoutToMessage(Text message) {
+        if (message.getSiblings().size() != 1) return false;
+        return message.getSiblings().get(0).getString().equals("Shoutout to ");
+    }
+
+    private static boolean isTheyPurchasedMessage(Text message) {
+        if (message.getSiblings().size() != 1) return false;
+        return message.getSiblings().get(0).getString().equals("They purchased ");
+    }
+
+    private static boolean isYouCanSupportMessage(Text message) {
+        if (message.getSiblings().size() != 1) return false;
+        return message.getSiblings().get(0).getString().equals("You can support CastiaMC by");
+    }
+
+    private static boolean isVisitShopMessage(Text message) {
+        if (message.getSiblings().size() != 2) return false;
+        return message.getSiblings().get(1).getString().equals("store.castiamc.com");
+    }
+
+    private static boolean handleStoreAdvertisementMessages(Text message) {
+        return isChatImage(message) ||
+                isShoutoutToMessage(message) ||
+                isTheyPurchasedMessage(message) ||
+                isYouCanSupportMessage(message) ||
+                isVisitShopMessage(message);
+    }
+
+    private static boolean handleFoundItemMessage(Text message) {
+        if (message.getSiblings().size() != 1) return false;
+        if (message.getSiblings().get(0).getSiblings().size() != 2) return false;
+        return message.getSiblings().get(0).getString().endsWith(" found a ");
     }
 }

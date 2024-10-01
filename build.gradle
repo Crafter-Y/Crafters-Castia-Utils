@@ -9,12 +9,19 @@ base {
     archivesName = project.archives_base_name
 }
 
-
 loom {
     runs {
         client {
             property("devauth.enabled", "true")
+            property("fabric.development", "true")
         }
+    }
+}
+
+afterEvaluate {
+    loom.runs.configureEach {
+        // https://fabricmc.net/wiki/tutorial:mixin_hotswaps
+        vmArg "-javaagent:${ configurations.compileClasspath.find { it.name.contains("sponge-mixin") } }"
     }
 }
 

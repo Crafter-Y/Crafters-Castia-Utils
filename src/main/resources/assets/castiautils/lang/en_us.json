@@ -19,5 +19,13 @@
   "text.autoconfig.castiautils.option.showcaseMessage": "Showcase messages",
   "text.autoconfig.castiautils.option.chatMessage": "Chat messages",
   "text.autoconfig.castiautils.option.emptyLines": "Empty Messages",
-  "text.autoconfig.castiautils.option.emptyLines.@Tooltip": "Advertisements often have empty lines before and after them."
+  "text.autoconfig.castiautils.option.emptyLines.@Tooltip": "Advertisements often have empty lines before and after them.",
+  "text.autoconfig.castiautils.option.tips": "Tips",
+  "text.autoconfig.castiautils.option.voteStreakMessage": "Vote streak messages",
+  "text.autoconfig.castiautils.option.voteStreakMessage.@Tooltip": "Player has voted x times and received: x Items",
+  "text.autoconfig.castiautils.option.voteReminderMessage": "Vote reminder message",
+  "text.autoconfig.castiautils.option.voteReminderMessage.@Tooltip": "The big blob in the chat reminding you that you have not voted recently",
+  "text.autoconfig.castiautils.option.storeAdvertisements": "Store advertisements",
+  "text.autoconfig.castiautils.option.playerFoundMessage": "Player found item messages",
+  "text.autoconfig.castiautils.option.playerFoundMessage.@Tooltip": "Player found a item!"
 }

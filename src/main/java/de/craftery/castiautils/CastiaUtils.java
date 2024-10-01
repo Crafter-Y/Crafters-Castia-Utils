@@ -18,5 +18,6 @@ public class CastiaUtils implements ModInitializer {
         AutoConfig.register(CastiaConfig.class, JanksonConfigSerializer::new);
 
         Adblocker.register();
+        //ShopLogger.register();
     }
 }

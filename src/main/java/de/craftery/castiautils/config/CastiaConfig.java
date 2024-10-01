@@ -12,6 +12,17 @@ public class CastiaConfig implements ConfigData {
     public boolean voteMessage = false;
 
     @ConfigEntry.Category("adblock")
+    @ConfigEntry.Gui.Tooltip
+    public boolean voteReminderMessage = false;
+
+    @ConfigEntry.Category("adblock")
+    public boolean storeAdvertisements = false;
+
+    @ConfigEntry.Category("adblock")
+    @ConfigEntry.Gui.Tooltip
+    public boolean emptyLines = false;
+
+    @ConfigEntry.Category("adblock")
     public boolean joinMessage = true;
 
     @ConfigEntry.Category("adblock")
@@ -44,8 +55,15 @@ public class CastiaConfig implements ConfigData {
     public boolean showcaseMessage = true;
 
     @ConfigEntry.Category("adblock")
+    public boolean tips = true;
+
+    @ConfigEntry.Category("adblock")
     @ConfigEntry.Gui.Tooltip
-    public boolean emptyLines = false;
+    public boolean voteStreakMessage = false;
+
+    @ConfigEntry.Category("adblock")
+    @ConfigEntry.Gui.Tooltip
+    public boolean playerFoundMessage = true;
 
     @ConfigEntry.Category("adblock")
     public boolean chatMessage = true;
