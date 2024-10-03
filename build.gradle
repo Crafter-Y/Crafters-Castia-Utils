@@ -32,6 +32,14 @@ repositories {
         url = "https://maven.terraformersmc.com/"
     }
     maven { url "https://maven.shedaniel.me/" }
+    maven {
+        name = "JackFredMaven"
+        url = "https://maven.jackf.red/releases/"
+    }
+    maven {
+        name 'Xander Maven'
+        url 'https://maven.isxander.dev/releases'
+    }
 }
 
 dependencies {
@@ -46,7 +54,15 @@ dependencies {
     modApi("me.shedaniel.cloth:cloth-config-fabric:15.0.140") {
         exclude(group: "net.fabricmc.fabric-api")
     }
+    modImplementation "red.jackf:whereisit:2.6.3+1.21.1"
+    modCompileOnly "me.shedaniel:RoughlyEnoughItems-api-fabric:16.0.783"
+    modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-fabric:16.0.783"
+
     implementation "blue.endless:jankson:1.2.3"
+    implementation 'com.google.code.gson:gson:2.11.0'
+
+    compileOnly 'org.projectlombok:lombok:1.18.34'
+    annotationProcessor 'org.projectlombok:lombok:1.18.34'
 }
 
 processResources {

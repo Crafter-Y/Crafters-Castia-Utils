@@ -73,8 +73,8 @@ public class Adblocker {
 
     private static boolean handleVoteMessage(Text message) {
         if (message.getSiblings().size() != 1) return false;
-        if (message.getSiblings().get(0).getSiblings().size() != 1) return false;
-        return message.getSiblings().get(0).getSiblings().get(0).getString().startsWith("has voted for cool rewards!");
+        if (message.getSiblings().getFirst().getSiblings().size() != 1) return false;
+        return message.getSiblings().getFirst().getSiblings().getFirst().getString().startsWith("has voted for cool rewards!");
     }
 
     private static boolean handleJoinMessage(Text message) {
@@ -108,7 +108,7 @@ public class Adblocker {
         // TODO: this could have false positives and could use more fingerprinting
         if (message.getSiblings().size() != 1) return false;
         if (message.getStyle().isItalic()) return false;
-        return message.getSiblings().get(0).toString().startsWith("translation{");
+        return message.getSiblings().getFirst().toString().startsWith("translation{");
     }
 
     private static boolean handleAfkMessage(Text message) {
@@ -123,8 +123,8 @@ public class Adblocker {
 
     private static boolean handleShowcaseMessage(Text message) {
         if (message.getSiblings().size() != 1) return false;
-        if (message.getSiblings().get(0).getSiblings().size() != 1) return false;
-        return message.getSiblings().get(0).getSiblings().get(0).getString().startsWith("is showcasing ");
+        if (message.getSiblings().getFirst().getSiblings().size() != 1) return false;
+        return message.getSiblings().getFirst().getSiblings().getFirst().getString().startsWith("is showcasing ");
     }
 
     private static boolean handleEmptyLine(Text message) {
@@ -134,14 +134,14 @@ public class Adblocker {
 
     private static boolean handleTips(Text message) {
         if (message.getSiblings().size() != 1) return false;
-        if (message.getSiblings().get(0).getSiblings().size() != 3) return false;
-        return message.getSiblings().get(0).getSiblings().get(0).getString().equals("Tip:");
+        if (message.getSiblings().getFirst().getSiblings().size() != 3) return false;
+        return message.getSiblings().getFirst().getSiblings().getFirst().getString().equals("Tip:");
     }
 
     private static boolean handleVoteStreakMessage(Text message) {
         if (message.getSiblings().size() != 1) return false;
-        if (message.getSiblings().get(0).getSiblings().size() != 1) return false;
-        return message.getSiblings().get(0).getSiblings().get(0).getString().startsWith("has voted ");
+        if (message.getSiblings().getFirst().getSiblings().size() != 1) return false;
+        return message.getSiblings().getFirst().getSiblings().getFirst().getString().startsWith("has voted ");
     }
 
     private static boolean isChatImage(Text message) {
@@ -150,28 +150,30 @@ public class Adblocker {
         int charCode = message.getString().charAt(0);
         CastiaUtils.LOGGER.info(charCode);
         return switch (charCode) {
-            case 57505: yield true; // Wumpus (hidden because message is broken otherwise
+            case 57505: // Wumpus (hidden because message is broken otherwise
+            case 57510: // Store buy image
+            case 57518: yield true; // Vote Image
             default: yield false;
         };
     }
 
     private static boolean isNotVotedRecentlyMessage(Text message) {
         if (message.getSiblings().size() != 1) return false;
-        return message.getSiblings().get(0).getString().equals("You have not voted recently:");
+        return message.getSiblings().getFirst().getString().equals("You have not voted recently:");
     }
 
     private static boolean isCurrentVoteMessage(Text message) {
-        return message.getString().equals("                You currently have ");
+        return message.getContent().toString().trim().startsWith("You currently have");
     }
 
     private static boolean isPleaseVoteMessage(Text message) {
         if (message.getSiblings().size() != 1) return false;
-        return message.getSiblings().get(0).getString().equals("/vote ");
+        return message.getSiblings().getFirst().getContent().toString().startsWith("/vote");
     }
 
     private static boolean isVoteToHideThisMessageMessage(Text message) {
         if (message.getSiblings().size() != 1) return false;
-        return message.getSiblings().get(0).getString().equals("Vote to hide this message...");
+        return message.getSiblings().getFirst().getString().equals("Vote to hide this message...");
     }
 
     private static boolean handleVoteReminderMessages(Text message) {
@@ -184,17 +186,17 @@ public class Adblocker {
 
     private static boolean isShoutoutToMessage(Text message) {
         if (message.getSiblings().size() != 1) return false;
-        return message.getSiblings().get(0).getString().equals("Shoutout to ");
+        return message.getSiblings().getFirst().getString().equals("Shoutout to ");
     }
 
     private static boolean isTheyPurchasedMessage(Text message) {
         if (message.getSiblings().size() != 1) return false;
-        return message.getSiblings().get(0).getString().equals("They purchased ");
+        return message.getSiblings().getFirst().getString().equals("They purchased ");
     }
 
     private static boolean isYouCanSupportMessage(Text message) {
         if (message.getSiblings().size() != 1) return false;
-        return message.getSiblings().get(0).getString().equals("You can support CastiaMC by");
+        return message.getSiblings().getFirst().getString().equals("You can support CastiaMC by");
     }
 
     private static boolean isVisitShopMessage(Text message) {
@@ -212,7 +214,7 @@ public class Adblocker {
 
     private static boolean handleFoundItemMessage(Text message) {
         if (message.getSiblings().size() != 1) return false;
-        if (message.getSiblings().get(0).getSiblings().size() != 2) return false;
-        return message.getSiblings().get(0).getString().endsWith(" found a ");
+        if (message.getSiblings().getFirst().getSiblings().size() != 2) return false;
+        return message.getSiblings().getFirst().getContent().toString().endsWith(" found a ");
     }
 }
