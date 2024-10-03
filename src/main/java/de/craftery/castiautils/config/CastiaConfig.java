@@ -66,5 +66,9 @@ public class CastiaConfig implements ConfigData {
     public boolean playerFoundMessage = true;
 
     @ConfigEntry.Category("adblock")
+    @ConfigEntry.Gui.Tooltip
+    public boolean gemstoneFoundMessage = true;
+
+    @ConfigEntry.Category("adblock")
     public boolean chatMessage = true;
 }

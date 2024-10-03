@@ -1,7 +1,9 @@
 package de.craftery.castiautils;
 
 import de.craftery.castiautils.adblock.Adblocker;
+import de.craftery.castiautils.chestshop.ItemShopTooltip;
 import de.craftery.castiautils.chestshop.ShopCommand;
+import de.craftery.castiautils.chestshop.ShopConfig;
 import de.craftery.castiautils.chestshop.ShopLogger;
 import de.craftery.castiautils.config.CastiaConfig;
 import me.shedaniel.autoconfig.AutoConfig;
@@ -19,7 +21,10 @@ public class CastiaUtils implements ModInitializer {
 
         AutoConfig.register(CastiaConfig.class, JanksonConfigSerializer::new);
 
+        ShopConfig.load();
+        ShopConfig.register();
         Adblocker.register();
+        ItemShopTooltip.register();
         ShopLogger.register();
         ShopCommand.register();
     }

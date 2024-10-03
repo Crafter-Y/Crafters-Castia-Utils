@@ -205,6 +205,18 @@ public class ShopCommand {
 
             base.append(Text.literal(" " + offer.getOwner()).formatted(Formatting.GRAY));
 
+            if (offer.isEmpty()) {
+                base.append(Text.literal(" (").formatted(Formatting.GRAY));
+                base.append(Text.literal("empty").formatted(Formatting.RED));
+                base.append(Text.literal(")").formatted(Formatting.GRAY));
+            }
+
+            if (offer.isFull()) {
+                base.append(Text.literal(" (").formatted(Formatting.GRAY));
+                base.append(Text.literal("full").formatted(Formatting.RED));
+                base.append(Text.literal(")").formatted(Formatting.GRAY));
+            }
+
             base.append(Text.literal(" "));
             Style style = Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/shop tp " + offer.getId()));
             style = style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Click to tp")));

@@ -27,5 +27,7 @@
   "text.autoconfig.castiautils.option.voteReminderMessage.@Tooltip": "The big blob in the chat reminding you that you have not voted recently",
   "text.autoconfig.castiautils.option.storeAdvertisements": "Store advertisements",
   "text.autoconfig.castiautils.option.playerFoundMessage": "Player found item messages",
-  "text.autoconfig.castiautils.option.playerFoundMessage.@Tooltip": "Player found a item!"
+  "text.autoconfig.castiautils.option.playerFoundMessage.@Tooltip": "Player found a item!",
+  "text.autoconfig.castiautils.option.gemstoneFoundMessage": "Gemstone reward messages",
+  "text.autoconfig.castiautils.option.gemstoneFoundMessage.@Tooltip": "Player got a Thing from the Gemstone!"
 }

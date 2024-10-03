@@ -1,6 +1,7 @@
 package de.craftery.castiautils.adblock;
 
 import de.craftery.castiautils.CastiaUtils;
+import de.craftery.castiautils.chestshop.ShopLogger;
 import de.craftery.castiautils.config.CastiaConfig;
 import me.shedaniel.autoconfig.AutoConfig;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
@@ -8,12 +9,27 @@ import net.minecraft.text.ClickEvent;
 import net.minecraft.text.Text;
 
 public class Adblocker {
-
     public static void register() {
         ClientReceiveMessageEvents.ALLOW_GAME.register((message, overlay) -> {
             if (overlay) return true;
 
             CastiaConfig config = AutoConfig.getConfigHolder(CastiaConfig.class).getConfig();
+
+            if (handleShopEmptyMessage(message)) {
+                return true;
+            }
+            if (handleShopFullMessage(message)) {
+                return true;
+            }
+            if (handleBoughtMessage(message)) {
+                return true;
+            }
+            if (handleSoldMessage(message)) {
+                return true;
+            }
+            if (handleNotEnoughFunds(message)) {
+                return true;
+            }
 
             if (handleChatMessage(message)) {
                 return config.chatMessage;
@@ -49,12 +65,59 @@ public class Adblocker {
                 return config.storeAdvertisements;
             } else if (handleFoundItemMessage(message)) {
                 return config.playerFoundMessage;
+            } else if (handleGemstoneMessage(message)) {
+                return config.gemstoneFoundMessage;
             } else {
                 CastiaUtils.LOGGER.info(message);
             }
 
             return true;
         });
+    }
+
+    private static boolean handleShopEmptyMessage(Text message) {
+        if (message.getSiblings().size() != 1) return false;
+        if(message.getSiblings().getFirst().getString().startsWith("This shop does not have enough stock")){
+            ShopLogger.onShopEmpty();
+            return true;
+        }
+        return false;
+    }
+
+    private static boolean handleShopFullMessage(Text message) {
+        if (message.getSiblings().size() != 1) return false;
+        if(message.getSiblings().getFirst().getString().equals("The shop does not have enough inventory space.")){
+            ShopLogger.onShopFull();
+            return true;
+        }
+        return false;
+    }
+
+    private static boolean handleBoughtMessage(Text message) {
+        if (message.getSiblings().size() != 1) return false;
+        if(message.getSiblings().getFirst().getString().startsWith("You bought ")){
+            ShopLogger.onBoughtMessage();
+            return true;
+        }
+        return false;
+    }
+
+    private static boolean handleSoldMessage(Text message) {
+        if (message.getSiblings().size() != 1) return false;
+        if(message.getSiblings().getFirst().getString().startsWith("You sold ")){
+            ShopLogger.onSoldMessage();
+            return true;
+        }
+        return false;
+    }
+
+    private static boolean handleNotEnoughFunds(Text message) {
+        if (message.getSiblings().size() != 1) return false;
+        if(message.getSiblings().getFirst().getString().startsWith("The shop owner does not have enough funds to buy this item")){
+            ShopLogger.onNotEnoughFunds();
+            return true;
+        }
+        return false;
     }
 
     private static boolean handleChatMessage(Text message) {
@@ -163,12 +226,12 @@ public class Adblocker {
     }
 
     private static boolean isCurrentVoteMessage(Text message) {
-        return message.getContent().toString().trim().startsWith("You currently have");
+        return message.getContent().toString().contains("You currently have");
     }
 
     private static boolean isPleaseVoteMessage(Text message) {
         if (message.getSiblings().size() != 1) return false;
-        return message.getSiblings().getFirst().getContent().toString().startsWith("/vote");
+        return message.getSiblings().getFirst().getContent().toString().contains("/vote");
     }
 
     private static boolean isVoteToHideThisMessageMessage(Text message) {
@@ -186,12 +249,12 @@ public class Adblocker {
 
     private static boolean isShoutoutToMessage(Text message) {
         if (message.getSiblings().size() != 1) return false;
-        return message.getSiblings().getFirst().getString().equals("Shoutout to ");
+        return message.getSiblings().getFirst().getString().startsWith("Shoutout to");
     }
 
     private static boolean isTheyPurchasedMessage(Text message) {
-        if (message.getSiblings().size() != 1) return false;
-        return message.getSiblings().getFirst().getString().equals("They purchased ");
+        if (message.getSiblings().size() != 2) return false;
+        return message.getSiblings().getFirst().getString().contains("They purchased");
     }
 
     private static boolean isYouCanSupportMessage(Text message) {
@@ -215,6 +278,12 @@ public class Adblocker {
     private static boolean handleFoundItemMessage(Text message) {
         if (message.getSiblings().size() != 1) return false;
         if (message.getSiblings().getFirst().getSiblings().size() != 2) return false;
-        return message.getSiblings().getFirst().getContent().toString().endsWith(" found a ");
+        return message.getSiblings().getFirst().getString().contains("found a");
+    }
+
+    private static boolean handleGemstoneMessage(Text message) {
+        if (message.getSiblings().size() != 1) return false;
+        if (message.getSiblings().getFirst().getSiblings().size() != 1) return false;
+        return message.getSiblings().getFirst().getSiblings().getFirst().getString().startsWith("got a");
     }
 }

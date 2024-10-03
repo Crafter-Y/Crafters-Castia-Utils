@@ -1,15 +1,8 @@
 package de.craftery.castiautils.chestshop;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonSyntaxException;
 import de.craftery.castiautils.CastiaUtils;
 import de.craftery.castiautils.Messages;
 import lombok.Setter;
-import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.Jankson;
-import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.JsonElement;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.fabricmc.fabric.api.client.message.v1.ClientSendMessageEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.minecraft.block.entity.BlockEntity;
@@ -22,26 +15,15 @@ import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.MapIdComponent;
 import net.minecraft.component.type.NbtComponent;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.tooltip.TooltipType;
-import net.minecraft.text.MutableText;
 import net.minecraft.text.PlainTextContent;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
-import net.minecraft.util.Formatting;
+import net.minecraft.util.hit.BlockHitResult;
+import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
-import org.apache.commons.io.FileUtils;
+import org.jetbrains.annotations.Nullable;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.math.RoundingMode;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -55,61 +37,7 @@ public class ShopLogger {
     private static String displayName = null;
     private static BlockPos pos = null;
 
-    private static File getConfigFile(String filename) {
-        filename = "./config/" + filename;
-        try {
-            File myObj = new File(filename);
-            boolean ignored = myObj.createNewFile();
-            return myObj;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private static void writeState() {
-        CastiaUtils.LOGGER.info("Saving state");
-        Jankson jankson = Jankson.builder().build();
-        JsonElement offers = jankson.toJson(Offer.getAll().toArray());
-        JsonElement shops = jankson.toJson(Shop.getAll().toArray());
-
-        BufferedWriter offersWriter;
-        BufferedWriter shopsWriter;
-        try {
-            offersWriter = new BufferedWriter(new FileWriter(getConfigFile("offers.json5")));
-            offersWriter.append(offers.toJson());
-            offersWriter.close();
-
-            shopsWriter = new BufferedWriter(new FileWriter(getConfigFile("shops.json5")));
-            shopsWriter.append(shops.toJson());
-            shopsWriter.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     public static void register() {
-        Gson gson = new Gson();
-        try {
-            String json = FileUtils.readFileToString(getConfigFile("offers.json5"), "UTF-8");
-            List<Offer> offers = new ArrayList<>(Arrays.stream(gson.fromJson(json, Offer[].class)).toList());
-            Offer.setOffers(offers);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (JsonSyntaxException e) {
-            CastiaUtils.LOGGER.info("No offers stored in file");
-        }
-
-        try {
-            String json = FileUtils.readFileToString(getConfigFile("shops.json5"), "UTF-8");
-            List<Shop> shops = new ArrayList<>(Arrays.stream(gson.fromJson(json, Shop[].class)).toList());
-            Shop.setShops(shops);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (JsonSyntaxException e) {
-            CastiaUtils.LOGGER.info(e);
-            CastiaUtils.LOGGER.info("No shops stored in file");
-        }
-
         UseBlockCallback.EVENT.register((player, world, hand, hitResult) -> {
             BlockEntity blockEntity = world.getBlockEntity(hitResult.getBlockPos());
             if (blockEntity instanceof SignBlockEntity signBlockEntity) {
@@ -148,69 +76,9 @@ public class ShopLogger {
                 }
             }
         }));
-
-        ClientLifecycleEvents.CLIENT_STOPPING.register((client) -> {
-            writeState();
-        });
-
-        AtomicInteger currentTick = new AtomicInteger(1);
-        ClientTickEvents.END_CLIENT_TICK.register((client) -> {
-            int tick = currentTick.getAndIncrement();
-
-            if (tick % 2400 == 0) {
-                writeState();
-            }
-
-        });
-
-        ItemTooltipCallback.EVENT.register((stack, context, type, lines) -> {
-            if (type == TooltipType.BASIC || type == TooltipType.ADVANCED) {
-                String itemId = getItemId(stack);
-                List<Offer> offers = Offer.getByItem(itemId);
-
-                if (offers.isEmpty()) return;
-
-                DecimalFormat df = new DecimalFormat("#.##");
-                df.setRoundingMode(RoundingMode.CEILING);
-
-                offers.sort(Comparator.comparing(Offer::getSellPrice));
-                Offer bestSellOffer = offers.reversed().getFirst();
-                Shop sellShop = Shop.getByName(bestSellOffer.getShop());
-
-                if (bestSellOffer.getSellPrice() > 0) {
-                    assert sellShop != null;
-                    MutableText sellAll = Text.empty();
-
-                    sellAll.append(Text.literal("Sell (" + stack.getCount() + ") for ").formatted(Formatting.GRAY));
-                    sellAll.append(Text.literal("$" + df.format(bestSellOffer.getSellPrice()*stack.getCount())).formatted(Formatting.GOLD));
-                    sellAll.append(Text.literal(" at ").formatted(Formatting.GRAY));
-
-                    sellAll.append(Text.literal(sellShop.getCommand()).formatted(Formatting.AQUA));
-                    lines.add(sellAll);
-
-                    MutableText sellSingle = Text.empty();
-                    sellSingle.append(Text.literal("Sell (1) for ").formatted(Formatting.GRAY));
-                    sellSingle.append(Text.literal("$" + df.format(bestSellOffer.getSellPrice())).formatted(Formatting.GOLD));
-                    lines.add(sellSingle);
-
-                }
-                offers.sort(Comparator.comparing(Offer::getBuyPrice));
-                Offer bestBuyOffer = offers.getFirst();
-                Shop buyShop = Shop.getByName(bestBuyOffer.getShop());
-                assert buyShop != null;
-                MutableText buyAll = Text.empty();
-
-                buyAll.append(Text.literal("Buy (1) for ").formatted(Formatting.GRAY));
-                buyAll.append(Text.literal("$" + df.format(bestBuyOffer.getBuyPrice())).formatted(Formatting.GOLD));
-                buyAll.append(Text.literal(" at ").formatted(Formatting.GRAY));
-
-                buyAll.append(Text.literal(buyShop.getCommand()).formatted(Formatting.AQUA));
-                lines.add(buyAll);
-            }
-        });
     }
 
-    private static String getItemId(ItemStack item) {
+    public static String getItemId(ItemStack item) {
         String itemId = "minecraft:" + item.getItem().getTranslationKey().split("\\.")[2];
 
         if (itemId.equals("minecraft:filled_map")) {
@@ -312,5 +180,53 @@ public class ShopLogger {
         offer.setZ(pos.getZ());
 
         player.sendMessage(Text.literal(selectedShop + " " + itemId + " (" + buyPrice + ", " + sellPrice + ")"), true);
+    }
+
+    private static @Nullable Offer getOfferAtPlayer() {
+        ClientPlayerEntity player = MinecraftClient.getInstance().player;
+
+        if (player == null) return null;
+        HitResult hit = player.raycast(20, 0, false);
+
+        if (hit.getType() != HitResult.Type.BLOCK) return null;
+        BlockHitResult blockHit = (BlockHitResult) hit;
+
+        int x = blockHit.getBlockPos().getX();
+        int y = blockHit.getBlockPos().getY();
+        int z = blockHit.getBlockPos().getZ();
+
+        return Offer.getByCoordinate(x,y,z);
+    }
+
+    public static void onShopEmpty() {
+        Offer shop = getOfferAtPlayer();
+        if (shop != null) {
+            shop.setEmpty(true);
+        }
+    }
+
+    public static void onShopFull() {
+        Offer shop = getOfferAtPlayer();
+        if (shop != null) {
+            shop.setFull(true);
+        }
+    }
+
+    public static void onBoughtMessage() {
+        Offer shop = getOfferAtPlayer();
+        if (shop != null) {
+            shop.setEmpty(false);
+        }
+    }
+
+    public static void onSoldMessage() {
+        Offer shop = getOfferAtPlayer();
+        if (shop != null) {
+            shop.setFull(false);
+        }
+    }
+
+    public static void onNotEnoughFunds() {
+        onShopFull();
     }
 }
