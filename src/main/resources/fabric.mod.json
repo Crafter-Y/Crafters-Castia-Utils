@@ -11,6 +11,7 @@
   "license": "All-Rights-Reserved",
   "icon": "assets/castiautils/icon.png",
   "environment": "client",
+  "accessWidener" : "castiautils.accesswidener",
   "entrypoints": {
     "main": [
       "de.craftery.castiautils.CastiaUtils"

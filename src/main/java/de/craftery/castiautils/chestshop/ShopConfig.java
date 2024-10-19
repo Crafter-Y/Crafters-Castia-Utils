@@ -31,8 +31,11 @@ public class ShopConfig {
             CastiaUtils.LOGGER.info("Loading data from local config");
             try {
                 String json = FileUtils.readFileToString(getConfigFile("offers.json5"), "UTF-8");
-                List<Offer> offers = new ArrayList<>(Arrays.stream(gson.fromJson(json, Offer[].class)).toList());
-                Offer.setOffers(offers);
+                Offer[] offersArr = gson.fromJson(json, Offer[].class);
+                if (offersArr != null) {
+                    List<Offer> offers = new ArrayList<>(Arrays.stream(offersArr).toList());
+                    Offer.setOffers(offers);
+                }
             } catch (IOException e) {
                 throw new RuntimeException(e);
             } catch (JsonSyntaxException e) {
@@ -41,8 +44,11 @@ public class ShopConfig {
 
             try {
                 String json = FileUtils.readFileToString(getConfigFile("shops.json5"), "UTF-8");
-                List<Shop> shops = new ArrayList<>(Arrays.stream(gson.fromJson(json, Shop[].class)).toList());
-                Shop.setShops(shops);
+                Shop[] shopArr = gson.fromJson(json, Shop[].class);
+                if (shopArr != null) {
+                    List<Shop> shops = new ArrayList<>(Arrays.stream(shopArr).toList());
+                    Shop.setShops(shops);
+                }
             } catch (IOException e) {
                 throw new RuntimeException(e);
             } catch (JsonSyntaxException e) {

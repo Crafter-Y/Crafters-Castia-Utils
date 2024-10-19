@@ -155,11 +155,6 @@ public class RequestService {
         private com.google.gson.JsonElement data;
     }
 
-    public static class ApiResponse {
-        private boolean success;
-        private String error;
-    }
-
     // https://daweini.wordpress.com/2013/12/20/apache-httpclient-send-entity-body-in-a-http-delete-request/
     @NotThreadSafe
     private static class HttpDeleteWithBody extends HttpEntityEnclosingRequestBase {
