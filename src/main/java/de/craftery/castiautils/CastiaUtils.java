@@ -28,4 +28,8 @@ public class CastiaUtils implements ModInitializer {
         ShopLogger.register();
         ShopCommand.register();
     }
+
+    public static CastiaConfig getConfig() {
+        return AutoConfig.getConfigHolder(CastiaConfig.class).getConfig();
+    }
 }

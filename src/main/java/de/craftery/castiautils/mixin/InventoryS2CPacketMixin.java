@@ -1,5 +1,6 @@
 package de.craftery.castiautils.mixin;
 
+import de.craftery.castiautils.CastiaUtils;
 import de.craftery.castiautils.chestshop.ShopLogger;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.s2c.play.InventoryS2CPacket;
@@ -23,6 +24,8 @@ public class InventoryS2CPacketMixin {
 
     @Inject(at = @At("HEAD"), method = "getContents")
     public void getContents(CallbackInfoReturnable<List<ItemStack>> cir) {
+        if (!CastiaUtils.getConfig().chestshopDataCollection) return;
+
         ShopLogger.onShopData(syncId, contents);
     }
 }

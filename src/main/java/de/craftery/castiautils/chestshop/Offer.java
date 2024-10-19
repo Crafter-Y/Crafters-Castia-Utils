@@ -1,5 +1,7 @@
 package de.craftery.castiautils.chestshop;
 
+import com.google.gson.JsonObject;
+import de.craftery.castiautils.CastiaUtils;
 import lombok.Data;
 import lombok.Setter;
 import org.jetbrains.annotations.Nullable;
@@ -28,9 +30,23 @@ public class Offer {
         offers.add(this);
     }
 
+    public static void mergeIncoming(List<Offer> newOffers) {
+        for (Offer offer : newOffers) {
+            if (offers.stream().noneMatch(s -> s.getId().equals(offer.getId()))) {
+                if (Shop.getByName(offer.getShop()) != null) {
+                    offers.add(offer);
+                }
+            }
+        }
+    }
+
     public static List<Offer> getByItem(String item) {
         List<Offer> offers = new ArrayList<>();
         for (Offer offer : Offer.offers) {
+            if (offer.item == null) {
+                CastiaUtils.LOGGER.error(offer.getId() + " " + offer.getOwner() + " is null!");
+                continue;
+            }
             if (offer.item.equals(item)) {
                 offers.add(offer);
             }
@@ -66,5 +82,15 @@ public class Offer {
 
     public static List<Offer> getAll() {
         return offers;
+    }
+
+    public JsonObject getUniqueIdentifier() {
+        JsonObject jsonObject = new JsonObject();
+        JsonObject coordinates = new JsonObject();
+        coordinates.addProperty("x", x);
+        coordinates.addProperty("y", y);
+        coordinates.addProperty("z", z);
+        jsonObject.add("x_y_z", coordinates);
+        return jsonObject;
     }
 }

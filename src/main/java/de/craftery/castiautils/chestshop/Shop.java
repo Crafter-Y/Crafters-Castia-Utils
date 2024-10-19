@@ -19,6 +19,14 @@ public class Shop {
         shops.add(this);
     }
 
+    public static void mergeIncoming(List<Shop> newShops) {
+        for (Shop shop : newShops) {
+            if (shops.stream().noneMatch(s -> s.getName().equals(shop.getName()))) {
+                shops.add(shop);
+            }
+        }
+    }
+
     public static @Nullable Shop getByName(String name) {
         return shops.stream().filter(shop -> shop.getName().equals(name)).findFirst().orElse(null);
     }

@@ -7,6 +7,7 @@ import me.shedaniel.autoconfig.annotation.ConfigEntry;
 @Config(name = "castiautils")
 public class CastiaConfig implements ConfigData {
 
+    // Adblock Options --------------------------------------------------------------------->>>>
     @ConfigEntry.Category("adblock")
     @ConfigEntry.Gui.Tooltip
     public boolean voteMessage = false;
@@ -71,4 +72,38 @@ public class CastiaConfig implements ConfigData {
 
     @ConfigEntry.Category("adblock")
     public boolean chatMessage = true;
+
+    // Chestshop Options --------------------------------------------------------------------->>>>
+    @ConfigEntry.Category("chestshop")
+    public boolean chestshopDataCollection = true;
+
+    @ConfigEntry.Category("chestshop")
+    @ConfigEntry.Gui.Tooltip
+    public boolean enableTooltipInfo = true;
+
+    // API Options --------------------------------------------------------------------->>>>
+    @ConfigEntry.Category("api")
+    @ConfigEntry.Gui.Tooltip
+    public String apiUrl = "https://castiaapi.crafter-y.de/";
+
+    @ConfigEntry.Category("api")
+    @ConfigEntry.Gui.Tooltip
+    public String token = "";
+
+    @ConfigEntry.Category("api")
+    @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
+    public DataSource dataSource = DataSource.LOCAL_ONLY;
+
+    @ConfigEntry.Category("api")
+    @ConfigEntry.Gui.Tooltip
+    public boolean contributeShops = false;
+
+    @ConfigEntry.Category("api")
+    @ConfigEntry.Gui.Tooltip
+    public boolean contributeOffers = false;
+
+
+    // Developer Options --------------------------------------------------------------------->>>>
+    @ConfigEntry.Category("dev")
+    public boolean devMode = false;
 }

@@ -68,7 +68,9 @@ public class Adblocker {
             } else if (handleGemstoneMessage(message)) {
                 return config.gemstoneFoundMessage;
             } else {
-                CastiaUtils.LOGGER.info(message);
+                if (config.devMode) {
+                    CastiaUtils.LOGGER.info(message);
+                }
             }
 
             return true;
@@ -211,12 +213,18 @@ public class Adblocker {
         if (!message.getSiblings().isEmpty()) return false;
         if (message.getString().length() != 1) return false;
         int charCode = message.getString().charAt(0);
-        CastiaUtils.LOGGER.info(charCode);
+
         return switch (charCode) {
             case 57505: // Wumpus (hidden because message is broken otherwise
             case 57510: // Store buy image
             case 57518: yield true; // Vote Image
-            default: yield false;
+            default: { // other image
+                CastiaConfig config = AutoConfig.getConfigHolder(CastiaConfig.class).getConfig();
+                if (config.devMode) {
+                    CastiaUtils.LOGGER.info(charCode);
+                }
+                yield false;
+            }
         };
     }
 
