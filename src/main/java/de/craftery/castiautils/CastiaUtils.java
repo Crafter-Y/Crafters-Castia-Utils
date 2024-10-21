@@ -1,6 +1,7 @@
 package de.craftery.castiautils;
 
 import de.craftery.castiautils.adblock.Adblocker;
+import de.craftery.castiautils.ah.AhLogger;
 import de.craftery.castiautils.chestshop.ItemShopTooltip;
 import de.craftery.castiautils.chestshop.ShopCommand;
 import de.craftery.castiautils.chestshop.ShopConfig;
@@ -23,6 +24,8 @@ public class CastiaUtils implements ModInitializer {
 
         ShopConfig.load();
         ShopConfig.register();
+
+        AhLogger.register();
         Adblocker.register();
         ItemShopTooltip.register();
         ShopLogger.register();

@@ -5,7 +5,8 @@
   "compatibilityLevel": "JAVA_21",
   "mixins": [
     "HandledScreensMixin",
-    "InventoryS2CPacketMixin"
+    "InventoryS2CPacketMixin",
+    "ScreenHandlerSlotUpdateS2CPacketMixin"
   ],
   "injectors": {
     "defaultRequire": 1

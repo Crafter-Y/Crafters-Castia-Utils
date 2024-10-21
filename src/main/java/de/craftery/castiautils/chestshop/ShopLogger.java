@@ -3,9 +3,7 @@ package de.craftery.castiautils.chestshop;
 import de.craftery.castiautils.CastiaUtils;
 import de.craftery.castiautils.Messages;
 import de.craftery.castiautils.api.RequestService;
-import de.craftery.castiautils.config.CastiaConfig;
 import lombok.Setter;
-import me.shedaniel.autoconfig.AutoConfig;
 import net.fabricmc.fabric.api.client.message.v1.ClientSendMessageEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.minecraft.block.entity.BlockEntity;
@@ -15,15 +13,19 @@ import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.component.Component;
 import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.ItemEnchantmentsComponent;
 import net.minecraft.component.type.MapIdComponent;
 import net.minecraft.component.type.NbtComponent;
+import net.minecraft.enchantment.Enchantment;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.text.PlainTextContent;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
+import org.apache.commons.lang3.SerializationUtils;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
@@ -88,23 +90,39 @@ public class ShopLogger {
     }
 
     public static String getItemId(ItemStack item) {
-        String itemId = "minecraft:" + item.getItem().getTranslationKey().split("\\.")[2];
+        StringBuilder itemId = new StringBuilder();
+        itemId.append("minecraft:").append(item.getItem().getTranslationKey().split("\\.")[2]);
 
-        if (itemId.equals("minecraft:filled_map")) {
+        if (itemId.toString().equals("minecraft:filled_map")) {
             MapIdComponent mapIdComponent = item.get(DataComponentTypes.MAP_ID);
 
             if (mapIdComponent != null) {
-                itemId += "#" + mapIdComponent.id();
+                itemId.append("#").append(mapIdComponent.id());
             }
         }
 
-        if (itemId.equals("minecraft:spawner")) {
+        if (itemId.toString().equals("minecraft:spawner")) {
             for (Component<?> component : item.getComponents()) {
                 if (component.type() == DataComponentTypes.CUSTOM_DATA && component.value() instanceof NbtComponent nbt) {
                     Pattern itemPattern = Pattern.compile("oxymechanics:spawner-type\":\"([A-Z_]+)\"");
                     Matcher itemMatcher = itemPattern.matcher(nbt.copyNbt().toString());
                     if (itemMatcher.find()) {
-                        itemId += "#" + itemMatcher.group(1).toLowerCase();
+                        itemId.append("#").append(itemMatcher.group(1).toLowerCase());
+                    }
+                }
+            }
+        }
+
+        if (itemId.toString().equals("minecraft:enchanted_book")) {
+            for (Component<?> component : item.getComponents()) {
+                if (component.type() == DataComponentTypes.STORED_ENCHANTMENTS && component.value() instanceof ItemEnchantmentsComponent enchantmentsComponent) {
+                    itemId.append("#");
+                    for (RegistryEntry<Enchantment> enchantment : enchantmentsComponent.getEnchantments()) {
+                        itemId.append(enchantment.getIdAsString().replace("minecraft:", ""));
+                        int enchantmentLevel = enchantmentsComponent.getLevel(enchantment);
+                        if (enchantmentLevel > 1) {
+                            itemId.append(enchantmentLevel);
+                        }
                     }
                 }
             }
@@ -115,22 +133,25 @@ public class ShopLogger {
                 Pattern itemPattern = Pattern.compile("oxywire:item_id\":\"([a-zA-Z\\d]+)\"");
                 Matcher itemMatcher = itemPattern.matcher(nbt.copyNbt().toString());
                 if (itemMatcher.find()) {
-                    itemId = "oxywire:" + itemMatcher.group(1).toLowerCase();
+                    itemId = new StringBuilder("oxywire:").append(itemMatcher.group(1).toLowerCase());
 
                     Pattern successPattern = Pattern.compile("oxymechanics:success-rate\":(\\d+)");
                     Matcher successMatcher = successPattern.matcher(nbt.copyNbt().toString());
 
                     if (successMatcher.find()) {
-                        itemId += "#" + successMatcher.group(1);
+                        itemId.append("#").append(successMatcher.group(1));
                     }
                 }
             }
         }
-        return itemId;
+        return itemId.toString();
     }
 
-    public static void onShopOpen(int syncId) {
+    public static void onContainerOpen(int syncId, Text title) {
         if (!CastiaUtils.getConfig().chestshopDataCollection) return;
+
+        if (title.getString().length() != 2) return;
+        if (title.getString().charAt(0) != 57344 || title.getString().charAt(1) != 57856) return;
 
         if ((MinecraftClient.getInstance().currentScreen instanceof GenericContainerScreen containerScreen)) {
             if(containerScreen.getTitle().getString().length() == 2 && containerScreen.getTitle().getString().charAt(0) == 57344 && containerScreen.getTitle().getString().charAt(1) == 57856) {
@@ -139,7 +160,7 @@ public class ShopLogger {
         }
     }
 
-    public static void onShopData(int syncId, List<ItemStack> data) {
+    public static void onInventoryData(int syncId, List<ItemStack> data) {
         if (!CastiaUtils.getConfig().chestshopDataCollection) return;
 
         if (syncId != currentSyncId) return;
@@ -216,18 +237,20 @@ public class ShopLogger {
         offer.setY(pos.getY());
         offer.setZ(pos.getZ());
 
-        CastiaConfig config = AutoConfig.getConfigHolder(CastiaConfig.class).getConfig();
-        if (config.contributeOffers) {
-            Optional<String> optional = triggerApiUpdate(offer);
-            if (optional.isEmpty()) {
-                player.sendMessage(Text.literal(selectedShop + " " + itemId + " (" + buyPrice + ", " + sellPrice + ") (synced)"), true);
+        final Offer offerToSend = SerializationUtils.clone(offer);
+        new Thread(() -> {
+            if (CastiaUtils.getConfig().contributeOffers) {
+                Optional<String> optional = RequestService.post("offer", offerToSend.getUniqueIdentifier(), offerToSend);
+                if (optional.isEmpty()) {
+                    player.sendMessage(Text.literal(selectedShop + " " + itemId + " (" + buyPrice + ", " + sellPrice + ") (synced)"), true);
+                } else {
+                    CastiaUtils.LOGGER.error(optional.get());
+                    player.sendMessage(Text.literal(selectedShop + " " + itemId + " (" + buyPrice + ", " + sellPrice + ") (sync failed)"), true);
+                }
             } else {
-                CastiaUtils.LOGGER.error(optional.get());
-                player.sendMessage(Text.literal(selectedShop + " " + itemId + " (" + buyPrice + ", " + sellPrice + ") (sync failed)"), true);
+                player.sendMessage(Text.literal(selectedShop + " " + itemId + " (" + buyPrice + ", " + sellPrice + ")"), true);
             }
-        } else {
-            player.sendMessage(Text.literal(selectedShop + " " + itemId + " (" + buyPrice + ", " + sellPrice + ")"), true);
-        }
+        }).start();
     }
 
     private static @Nullable Offer getOfferAtPlayer() {
@@ -251,8 +274,8 @@ public class ShopLogger {
 
         Offer shop = getOfferAtPlayer();
         if (shop != null) {
-            triggerApiUpdate(shop);
             shop.setEmpty(true);
+            triggerApiUpdate(shop);
         }
     }
 
@@ -261,8 +284,8 @@ public class ShopLogger {
 
         Offer shop = getOfferAtPlayer();
         if (shop != null) {
-            triggerApiUpdate(shop);
             shop.setFull(true);
+            triggerApiUpdate(shop);
         }
     }
 
@@ -271,8 +294,8 @@ public class ShopLogger {
 
         Offer shop = getOfferAtPlayer();
         if (shop != null) {
-            triggerApiUpdate(shop);
             shop.setEmpty(false);
+            triggerApiUpdate(shop);
         }
     }
 
@@ -281,8 +304,8 @@ public class ShopLogger {
 
         Offer shop = getOfferAtPlayer();
         if (shop != null) {
-            triggerApiUpdate(shop);
             shop.setFull(false);
+            triggerApiUpdate(shop);
         }
     }
 
@@ -290,11 +313,16 @@ public class ShopLogger {
         onShopFull();
     }
 
-    private static Optional<String> triggerApiUpdate(Offer offer) {
-        CastiaConfig config = AutoConfig.getConfigHolder(CastiaConfig.class).getConfig();
-        if (config.contributeOffers) {
-            return RequestService.post("offer", offer.getUniqueIdentifier(), offer);
-        }
-        return Optional.empty();
+    private static void triggerApiUpdate(Offer offer) {
+        new Thread(() -> {
+            if (CastiaUtils.getConfig().contributeOffers) {
+                Optional<String> optional = RequestService.post("offer", offer.getUniqueIdentifier(), offer);
+                if (optional.isPresent()) {
+                    ClientPlayerEntity player = MinecraftClient.getInstance().player;
+                    if (player == null) return;
+                    Messages.sendPlayerMessage(player, "syncFailed", optional.get());
+                }
+            }
+        }).start();
     }
 }

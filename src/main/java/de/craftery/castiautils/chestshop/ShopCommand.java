@@ -2,6 +2,7 @@ package de.craftery.castiautils.chestshop;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
+import de.craftery.castiautils.CastiaUtils;
 import de.craftery.castiautils.Messages;
 import de.craftery.castiautils.api.RequestService;
 import de.craftery.castiautils.config.CastiaConfig;
@@ -147,8 +148,7 @@ public class ShopCommand {
 
         ShopLogger.setSelectedShop(name);
 
-        CastiaConfig config = AutoConfig.getConfigHolder(CastiaConfig.class).getConfig();
-        if (config.contributeShops) {
+        if (CastiaUtils.getConfig().contributeShops) {
             Optional<String> optional = RequestService.put("shop", shop);
             if (optional.isEmpty()) {
                 Messages.sendCommandFeedback(context, "successfulContribution");
@@ -302,8 +302,7 @@ public class ShopCommand {
 
             shop.delete();
 
-            CastiaConfig config = AutoConfig.getConfigHolder(CastiaConfig.class).getConfig();
-            if (config.contributeOffers) {
+            if (CastiaUtils.getConfig().contributeOffers) {
                 Optional<String> optional = RequestService.delete("offer", shop.getUniqueIdentifier());
                 if (optional.isPresent()) {
                     Messages.sendCommandFeedback(context, "deleteApiRequestFailed", optional.get());
@@ -340,7 +339,7 @@ public class ShopCommand {
     }
 
     public static void pushShops(CommandContext<FabricClientCommandSource> context) {
-        CastiaConfig config = AutoConfig.getConfigHolder(CastiaConfig.class).getConfig();
+        CastiaConfig config = CastiaUtils.getConfig();
 
         if (config.apiUrl.isEmpty()) {
             Messages.sendCommandFeedback(context, "noApiUrl");
@@ -370,7 +369,7 @@ public class ShopCommand {
     }
 
     public static void reloadShops(CommandContext<FabricClientCommandSource> context) {
-        CastiaConfig config = AutoConfig.getConfigHolder(CastiaConfig.class).getConfig();
+        CastiaConfig config = CastiaUtils.getConfig();
 
         ShopConfig.writeState();
         ShopConfig.load();
@@ -397,8 +396,7 @@ public class ShopCommand {
                 offer.delete();
                 deletedCount++;
 
-                CastiaConfig config = AutoConfig.getConfigHolder(CastiaConfig.class).getConfig();
-                if (config.contributeOffers) {
+                if (CastiaUtils.getConfig().contributeOffers) {
                     Optional<String> optional = RequestService.delete("offer", offer.getUniqueIdentifier());
                     if (optional.isPresent()) {
                         Messages.sendCommandFeedback(context, "deleteApiRequestFailed", optional.get());

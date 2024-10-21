@@ -13,7 +13,7 @@ public class Adblocker {
         ClientReceiveMessageEvents.ALLOW_GAME.register((message, overlay) -> {
             if (overlay) return true;
 
-            CastiaConfig config = AutoConfig.getConfigHolder(CastiaConfig.class).getConfig();
+            CastiaConfig config = CastiaUtils.getConfig();
 
             if (handleShopEmptyMessage(message)) {
                 return true;
@@ -219,8 +219,7 @@ public class Adblocker {
             case 57510: // Store buy image
             case 57518: yield true; // Vote Image
             default: { // other image
-                CastiaConfig config = AutoConfig.getConfigHolder(CastiaConfig.class).getConfig();
-                if (config.devMode) {
+                if (CastiaUtils.getConfig().devMode) {
                     CastiaUtils.LOGGER.info(charCode);
                 }
                 yield false;

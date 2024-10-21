@@ -102,6 +102,12 @@ public class CastiaConfig implements ConfigData {
     @ConfigEntry.Gui.Tooltip
     public boolean contributeOffers = false;
 
+    @ConfigEntry.Category("api")
+    public boolean contributeAuctions = false;
+
+    @ConfigEntry.Category("api")
+    @ConfigEntry.Gui.Tooltip
+    public boolean queryAdditionalTooltip = false;
 
     // Developer Options --------------------------------------------------------------------->>>>
     @ConfigEntry.Category("dev")

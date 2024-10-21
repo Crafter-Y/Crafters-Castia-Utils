@@ -19,6 +19,7 @@ public class ItemShopTooltip {
     @Setter
     private static String currentInventoryTitle = "";
 
+
     public static void register() {
         ItemTooltipCallback.EVENT.register((stack, context, type, lines) -> {
             if (!CastiaUtils.getConfig().enableTooltipInfo) return;

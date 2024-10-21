@@ -24,7 +24,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class ShopConfig {
     public static void load() {
-        CastiaConfig config = AutoConfig.getConfigHolder(CastiaConfig.class).getConfig();
+        CastiaConfig config = CastiaUtils.getConfig();
         Gson gson = new Gson();
 
         if (config.dataSource == DataSource.LOCAL_ONLY || config.dataSource == DataSource.MERGE) {
@@ -92,9 +92,7 @@ public class ShopConfig {
     }
 
     public static void register() {
-        ClientLifecycleEvents.CLIENT_STOPPING.register((client) -> {
-            writeState();
-        });
+        ClientLifecycleEvents.CLIENT_STOPPING.register((client) -> writeState());
 
         AtomicInteger currentTick = new AtomicInteger(1);
         ClientTickEvents.END_CLIENT_TICK.register((client) -> {
@@ -108,7 +106,7 @@ public class ShopConfig {
     }
 
     public static void writeState() {
-        CastiaConfig config = AutoConfig.getConfigHolder(CastiaConfig.class).getConfig();
+        CastiaConfig config = CastiaUtils.getConfig();
 
         if (config.dataSource == DataSource.LOCAL_ONLY || config.dataSource == DataSource.MERGE) {
             CastiaUtils.LOGGER.info("Saving data to local storage");

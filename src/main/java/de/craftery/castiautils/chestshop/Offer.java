@@ -6,11 +6,12 @@ import lombok.Data;
 import lombok.Setter;
 import org.jetbrains.annotations.Nullable;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 @Data
-public class Offer {
+public class Offer implements Serializable {
     private String shop;
     private int x;
     private int y;

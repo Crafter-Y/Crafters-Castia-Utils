@@ -2,6 +2,7 @@ package de.craftery.castiautils.api;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import de.craftery.castiautils.CastiaUtils;
 import de.craftery.castiautils.config.CastiaConfig;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -24,7 +25,7 @@ import java.util.Optional;
 public class RequestService {
     public static Optional<String> put(String route, Object data) {
         if (!checkApiPrerequisites()) return Optional.of("API token or URL empty");
-        CastiaConfig config = AutoConfig.getConfigHolder(CastiaConfig.class).getConfig();
+        CastiaConfig config = CastiaUtils.getConfig();
         Gson gson = new Gson();
 
         try {
@@ -57,7 +58,7 @@ public class RequestService {
             jso.addProperty("error", "API token or URL empty");
             return new ApiResponseWithData(false, jso);
         }
-        CastiaConfig config = AutoConfig.getConfigHolder(CastiaConfig.class).getConfig();
+        CastiaConfig config = CastiaUtils.getConfig();
 
         try {
             HttpClient httpClient = HttpClientBuilder.create().build();
@@ -76,7 +77,7 @@ public class RequestService {
 
     public static Optional<String> post(String route, JsonObject uniqueIdentifier, Object data) {
         if (!checkApiPrerequisites()) return Optional.of("API token or URL empty");
-        CastiaConfig config = AutoConfig.getConfigHolder(CastiaConfig.class).getConfig();
+        CastiaConfig config = CastiaUtils.getConfig();
         Gson gson = new Gson();
 
         try {
@@ -108,7 +109,7 @@ public class RequestService {
 
     public static Optional<String> delete(String route, JsonObject uniqueIdentifier) {
         if (!checkApiPrerequisites()) return Optional.of("API token or URL empty");
-        CastiaConfig config = AutoConfig.getConfigHolder(CastiaConfig.class).getConfig();
+        CastiaConfig config = CastiaUtils.getConfig();
         Gson gson = new Gson();
 
         try {
@@ -137,7 +138,7 @@ public class RequestService {
     }
 
     private static boolean checkApiPrerequisites() {
-        CastiaConfig config = AutoConfig.getConfigHolder(CastiaConfig.class).getConfig();
+        CastiaConfig config = CastiaUtils.getConfig();
 
         if (config.apiUrl.isEmpty()) return false;
         return !config.token.isEmpty();
