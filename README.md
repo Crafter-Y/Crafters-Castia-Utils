@@ -20,11 +20,11 @@ If you want a token to play around, I might provide you one if you message me in
 
 - Chat Adblock (Configurable categories, e.g. showcase, vote, tips, store advertisements)
 - ChestShop Data Collection (Stores every chestshop in a database)
-- Useful Tooltip Data (displays the stack/buy/sell price of every item in its item tag)
+- Useful Tooltip Data (displays the stack/buy/sell price of every item in its item tag) (some parts require API)
+- Auction house price tracking (requires API)
 
 Planned features:
 
-- Auction house price tracking
 - Web frontend to view itemprices and money gathering opportunities
 - Personal chat history (see what someone said in the past)
 - Personal money history (see your money history and other's as well)

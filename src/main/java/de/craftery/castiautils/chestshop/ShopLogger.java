@@ -2,6 +2,7 @@ package de.craftery.castiautils.chestshop;
 
 import de.craftery.castiautils.CastiaUtils;
 import de.craftery.castiautils.Messages;
+import de.craftery.castiautils.api.AdditionalDataTooltip;
 import de.craftery.castiautils.api.RequestService;
 import lombok.Setter;
 import net.fabricmc.fabric.api.client.message.v1.ClientSendMessageEvents;
@@ -243,6 +244,7 @@ public class ShopLogger {
                 Optional<String> optional = RequestService.post("offer", offerToSend.getUniqueIdentifier(), offerToSend);
                 if (optional.isEmpty()) {
                     player.sendMessage(Text.literal(selectedShop + " " + itemId + " (" + buyPrice + ", " + sellPrice + ") (synced)"), true);
+                    AdditionalDataTooltip.invalidateCache(offerToSend.getItem());
                 } else {
                     CastiaUtils.LOGGER.error(optional.get());
                     player.sendMessage(Text.literal(selectedShop + " " + itemId + " (" + buyPrice + ", " + sellPrice + ") (sync failed)"), true);
@@ -322,6 +324,7 @@ public class ShopLogger {
                     if (player == null) return;
                     Messages.sendPlayerMessage(player, "syncFailed", optional.get());
                 }
+                AdditionalDataTooltip.invalidateCache(offer.getItem());
             }
         }).start();
     }

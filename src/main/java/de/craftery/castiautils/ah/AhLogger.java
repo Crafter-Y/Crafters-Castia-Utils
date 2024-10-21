@@ -2,6 +2,7 @@ package de.craftery.castiautils.ah;
 
 import blue.endless.jankson.annotation.Nullable;
 import de.craftery.castiautils.CastiaUtils;
+import de.craftery.castiautils.api.AdditionalDataTooltip;
 import de.craftery.castiautils.api.RequestService;
 import de.craftery.castiautils.chestshop.ShopLogger;
 import lombok.Getter;
@@ -28,13 +29,16 @@ public class AhLogger {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (!CastiaUtils.getConfig().contributeAuctions) return;
 
-           if (commitPendingIn > 0) {
-               commitPendingIn--;
-               if (commitPendingIn == 0) {
-                   RequestService.put("auction", pendingOffers.toArray());
-                   pendingOffers.clear();
-               }
-           }
+            if (commitPendingIn > 0) {
+                commitPendingIn--;
+                if (commitPendingIn == 0) {
+                    RequestService.put("auction", pendingOffers.toArray());
+                    for (AhOffer offer : pendingOffers) {
+                        AdditionalDataTooltip.invalidateCache(offer.getItem());
+                    }
+                    pendingOffers.clear();
+                }
+            }
         });
     }
 

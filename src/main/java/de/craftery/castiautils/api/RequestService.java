@@ -7,7 +7,6 @@ import de.craftery.castiautils.config.CastiaConfig;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.Jankson;
 import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.JsonElement;
 import org.apache.http.HttpResponse;
@@ -51,6 +50,35 @@ public class RequestService {
         }
     }
 
+    public static ApiResponseWithData get(String route, Object data) {
+        Gson gson = new Gson();
+        if (!checkApiPrerequisites()) {
+            JsonObject jso = new JsonObject();
+            jso.addProperty("error", "API token or URL empty");
+            return new ApiResponseWithData(false, jso);
+        }
+        CastiaConfig config = CastiaUtils.getConfig();
+
+        try {
+            HttpClient httpClient = HttpClientBuilder.create().build();
+            HttpGetWithBody get = new HttpGetWithBody(config.apiUrl + route);
+            Jankson jankson = Jankson.builder().build();
+            JsonElement inputJson = jankson.toJson(data);
+            StringEntity postingString = new StringEntity(inputJson.toJson());
+            get.setEntity(postingString);
+            get.setHeader("Accept", "application/json");
+            get.setHeader("Content-type", "application/json");
+            get.setHeader("Authorization","Bearer " + config.token);
+            HttpResponse response = httpClient.execute(get);
+            String responseString = new BasicResponseHandler().handleResponse(response);
+            return gson.fromJson(responseString, RequestService.ApiResponseWithData.class);
+        } catch (IOException e) {
+            JsonObject jso = new JsonObject();
+            jso.addProperty("error", e.getMessage());
+            return new ApiResponseWithData(false, jso);
+        }
+    }
+
     public static ApiResponseWithData get(String route) {
         Gson gson = new Gson();
         if (!checkApiPrerequisites()) {
@@ -62,10 +90,10 @@ public class RequestService {
 
         try {
             HttpClient httpClient = HttpClientBuilder.create().build();
-            HttpGet put = new HttpGet(config.apiUrl + route);
-            put.setHeader("Accept", "application/json");
-            put.setHeader("Authorization","Bearer " + config.token);
-            HttpResponse response = httpClient.execute(put);
+            HttpGet get = new HttpGet(config.apiUrl + route);
+            get.setHeader("Accept", "application/json");
+            get.setHeader("Authorization","Bearer " + config.token);
+            HttpResponse response = httpClient.execute(get);
             String responseString = new BasicResponseHandler().handleResponse(response);
             return gson.fromJson(responseString, RequestService.ApiResponseWithData.class);
         } catch (IOException e) {
@@ -82,7 +110,7 @@ public class RequestService {
 
         try {
             HttpClient httpClient = HttpClientBuilder.create().build();
-            HttpPost put = new HttpPost(config.apiUrl + route);
+            HttpPost post = new HttpPost(config.apiUrl + route);
             com.google.gson.JsonElement inputJson = gson.toJsonTree(data);
 
             JsonObject object = new JsonObject();
@@ -90,10 +118,10 @@ public class RequestService {
             object.add("data", inputJson);
 
             StringEntity postingString = new StringEntity(object.toString());
-            put.setEntity(postingString);
-            put.setHeader("Content-type", "application/json");
-            put.setHeader("Authorization","Bearer " + config.token);
-            HttpResponse response = httpClient.execute(put);
+            post.setEntity(postingString);
+            post.setHeader("Content-type", "application/json");
+            post.setHeader("Authorization","Bearer " + config.token);
+            HttpResponse response = httpClient.execute(post);
             String responseString = new BasicResponseHandler().handleResponse(response);
             ApiDefaultResponse json = gson.fromJson(responseString, RequestService.ApiDefaultResponse.class);
             if (json.success) {
@@ -114,16 +142,16 @@ public class RequestService {
 
         try {
             HttpClient httpClient = HttpClientBuilder.create().build();
-            HttpDeleteWithBody put = new HttpDeleteWithBody(config.apiUrl + route);
+            HttpDeleteWithBody delete = new HttpDeleteWithBody(config.apiUrl + route);
 
             JsonObject object = new JsonObject();
             object.add("uniqueIdentifier", uniqueIdentifier);
 
             StringEntity postingString = new StringEntity(object.toString());
-            put.setEntity(postingString);
-            put.setHeader("Content-type", "application/json");
-            put.setHeader("Authorization","Bearer " + config.token);
-            HttpResponse response = httpClient.execute(put);
+            delete.setEntity(postingString);
+            delete.setHeader("Content-type", "application/json");
+            delete.setHeader("Authorization","Bearer " + config.token);
+            HttpResponse response = httpClient.execute(delete);
             String responseString = new BasicResponseHandler().handleResponse(response);
             ApiDefaultResponse json = gson.fromJson(responseString, RequestService.ApiDefaultResponse.class);
             if (json.success) {
@@ -159,24 +187,25 @@ public class RequestService {
     // https://daweini.wordpress.com/2013/12/20/apache-httpclient-send-entity-body-in-a-http-delete-request/
     @NotThreadSafe
     private static class HttpDeleteWithBody extends HttpEntityEnclosingRequestBase {
-        public static final String METHOD_NAME = "DELETE";
-
         public String getMethod() {
-            return METHOD_NAME;
+            return "DELETE";
         }
 
         public HttpDeleteWithBody(final String uri) {
             super();
             setURI(URI.create(uri));
         }
+    }
 
-        public HttpDeleteWithBody(final URI uri) {
-            super();
-            setURI(uri);
+    @NotThreadSafe
+    private static class HttpGetWithBody extends HttpEntityEnclosingRequestBase {
+        public String getMethod() {
+            return "GET";
         }
 
-        public HttpDeleteWithBody() {
+        public HttpGetWithBody(final String uri) {
             super();
+            setURI(URI.create(uri));
         }
     }
 }

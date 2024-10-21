@@ -4,6 +4,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import de.craftery.castiautils.CastiaUtils;
 import de.craftery.castiautils.Messages;
+import de.craftery.castiautils.api.AdditionalDataTooltip;
 import de.craftery.castiautils.api.RequestService;
 import de.craftery.castiautils.config.CastiaConfig;
 import de.craftery.castiautils.config.DataSource;
@@ -373,6 +374,7 @@ public class ShopCommand {
 
         ShopConfig.writeState();
         ShopConfig.load();
+        AdditionalDataTooltip.invalidateAll();
 
         if (config.dataSource == DataSource.LOCAL_ONLY) {
             Messages.sendCommandFeedback(context, "reloadedLocal");

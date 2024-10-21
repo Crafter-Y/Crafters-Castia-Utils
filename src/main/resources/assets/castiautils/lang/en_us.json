@@ -24,6 +24,7 @@
   "castiautils.offersDeleted": "Successfully deleted %s offers.",
   "castiautils.noOffersDeleted": "This shop already has no offers.",
   "castiautils.syncFailed": "Sync failed: %s",
+  "castiautils.loadingAdditionalData": "Loading additional data...",
 
   "text.autoconfig.castiautils.title": "Crafters Castia Utils Configuration",
   "text.autoconfig.castiautils.category.adblock": "Adblock",

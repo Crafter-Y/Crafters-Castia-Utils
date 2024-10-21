@@ -19,20 +19,21 @@ public class ItemShopTooltip {
     @Setter
     private static String currentInventoryTitle = "";
 
+    public static boolean shouldHideTooltopBecauseOfContainer() {
+        if (MinecraftClient.getInstance().currentScreen instanceof GenericContainerScreen) {
+            return !currentInventoryTitle.isEmpty() &&
+                    !currentInventoryTitle.equals("Auctions") && // dont hide in auctions
+                    (currentInventoryTitle.length() != 2 || currentInventoryTitle.charAt(0) != 57344 || currentInventoryTitle.charAt(1) != 57856); // dont hide in chestshops
+        }
+        return false;
+    }
+
 
     public static void register() {
         ItemTooltipCallback.EVENT.register((stack, context, type, lines) -> {
             if (!CastiaUtils.getConfig().enableTooltipInfo) return;
 
-            if (MinecraftClient.getInstance().currentScreen instanceof GenericContainerScreen) {
-                if (
-                        !currentInventoryTitle.isEmpty() &&
-                        !currentInventoryTitle.equals("Auctions") && // dont hide in auctions
-                        !(currentInventoryTitle.length() == 2 && currentInventoryTitle.charAt(0) == 57344 && currentInventoryTitle.charAt(1) == 57856)) // dont hide in chestshops
-                {
-                    return;
-                }
-            }
+            if (shouldHideTooltopBecauseOfContainer()) return;
 
             if (type == TooltipType.BASIC || type == TooltipType.ADVANCED) {
                 String itemId = ShopLogger.getItemId(stack);
