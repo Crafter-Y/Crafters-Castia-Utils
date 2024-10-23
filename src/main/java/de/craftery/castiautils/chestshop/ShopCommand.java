@@ -370,17 +370,22 @@ public class ShopCommand {
     public static void reloadShops(CommandContext<FabricClientCommandSource> context) {
         CastiaConfig config = CastiaUtils.getConfig();
 
-        ShopConfig.writeState();
-        ShopConfig.load();
-        AdditionalDataTooltip.invalidateAll();
+        new Thread(() -> {
+            ShopConfig.writeState();
+            Optional<String> loadError = ShopConfig.load();
 
-        if (config.dataSource == DataSource.LOCAL_ONLY) {
-            Messages.sendCommandFeedback(context, "reloadedLocal");
-        } else if (config.dataSource == DataSource.SERVER_ONLY) {
-            Messages.sendCommandFeedback(context, "reloadedServer");
-        } else {
-            Messages.sendCommandFeedback(context, "reloadedMerge");
-        }
+            if (loadError.isPresent()) {
+                Messages.sendCommandFeedback(context, "reloadFailed", loadError.get());
+            } else if (config.dataSource == DataSource.LOCAL_ONLY) {
+                Messages.sendCommandFeedback(context, "reloadedLocal");
+            } else if (config.dataSource == DataSource.SERVER_ONLY) {
+                Messages.sendCommandFeedback(context, "reloadedServer");
+            } else {
+                Messages.sendCommandFeedback(context, "reloadedMerge");
+            }
+
+            AdditionalDataTooltip.invalidateAll();
+        }).start();
     }
 
     public static void resetShop(CommandContext<FabricClientCommandSource> context, String shopName) {

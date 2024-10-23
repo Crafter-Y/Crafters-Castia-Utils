@@ -6,7 +6,6 @@ import de.craftery.castiautils.CastiaUtils;
 import de.craftery.castiautils.api.RequestService;
 import de.craftery.castiautils.config.CastiaConfig;
 import de.craftery.castiautils.config.DataSource;
-import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.Jankson;
 import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.JsonElement;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
@@ -20,10 +19,11 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ShopConfig {
-    public static void load() {
+    public static Optional<String> load() {
         CastiaConfig config = CastiaUtils.getConfig();
         Gson gson = new Gson();
 
@@ -39,7 +39,7 @@ public class ShopConfig {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             } catch (JsonSyntaxException e) {
-                CastiaUtils.LOGGER.info("No offers stored in file");
+                return Optional.of("Could not load offers.json5: " + e.getMessage());
             }
 
             try {
@@ -52,17 +52,14 @@ public class ShopConfig {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             } catch (JsonSyntaxException e) {
-                CastiaUtils.LOGGER.info(e);
-                CastiaUtils.LOGGER.info("No shops stored in file");
+                return Optional.of("Could not load shops.json5: " + e.getMessage());
             }
         }
-        if (config.dataSource == DataSource.LOCAL_ONLY) return;
+        if (config.dataSource == DataSource.LOCAL_ONLY) return Optional.empty();
 
         RequestService.ApiResponseWithData shopData = RequestService.get("shop");
         if (!shopData.isSuccess()) {
-            // TODO: do something
-            CastiaUtils.LOGGER.error("Failed to load shops from API: " + shopData.getData().toString());
-            return;
+            return Optional.of("Failed to load shops from API: " + shopData.getData().toString());
         }
 
         List<Shop> shops = new ArrayList<>(Arrays.stream(gson.fromJson(shopData.getData(), Shop[].class)).toList());
@@ -76,9 +73,7 @@ public class ShopConfig {
 
         RequestService.ApiResponseWithData offerData = RequestService.get("offer");
         if (!offerData.isSuccess()) {
-            // TODO: do something
-            CastiaUtils.LOGGER.error("Failed to load offers from API: " + offerData.getData().toString());
-            return;
+            return Optional.of("Failed to load offers from API: " + offerData.getData().toString());
         }
 
         List<Offer> offers = new ArrayList<>(Arrays.stream(gson.fromJson(offerData.getData(), Offer[].class)).toList());
@@ -89,6 +84,7 @@ public class ShopConfig {
             CastiaUtils.LOGGER.info("Merging data from API");
             Offer.mergeIncoming(offers);
         }
+        return Optional.empty();
     }
 
     public static void register() {

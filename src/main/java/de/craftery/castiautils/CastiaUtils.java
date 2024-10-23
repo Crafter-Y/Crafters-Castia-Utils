@@ -14,6 +14,8 @@ import net.fabricmc.api.ModInitializer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.util.Optional;
+
 public class CastiaUtils implements ModInitializer {
     public static final Logger LOGGER = LogManager.getLogger("castiautils");
 
@@ -23,7 +25,7 @@ public class CastiaUtils implements ModInitializer {
 
         AutoConfig.register(CastiaConfig.class, JanksonConfigSerializer::new);
 
-        ShopConfig.load();
+        logOptional(ShopConfig.load());
         ShopConfig.register();
 
         AhLogger.register();
@@ -36,5 +38,9 @@ public class CastiaUtils implements ModInitializer {
 
     public static CastiaConfig getConfig() {
         return AutoConfig.getConfigHolder(CastiaConfig.class).getConfig();
+    }
+
+    public static void logOptional(Optional<String> response) {
+        response.ifPresent(LOGGER::error);
     }
 }
