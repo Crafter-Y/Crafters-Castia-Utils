@@ -14,11 +14,10 @@ import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.component.Component;
 import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.ItemEnchantmentsComponent;
-import net.minecraft.component.type.MapIdComponent;
-import net.minecraft.component.type.NbtComponent;
+import net.minecraft.component.type.*;
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.item.ItemStack;
+import net.minecraft.potion.Potion;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.text.PlainTextContent;
 import net.minecraft.text.Text;
@@ -125,6 +124,27 @@ public class ShopLogger {
                             itemId.append(enchantmentLevel);
                         }
                     }
+                }
+            }
+        }
+
+        if (itemId.toString().equals("minecraft:potion") || itemId.toString().equals("minecraft:splash_potion")) {
+            for (Component<?> component : item.getComponents()) {
+                if (component.type() == DataComponentTypes.POTION_CONTENTS && component.value() instanceof PotionContentsComponent potionComponent) {
+                    Optional<RegistryEntry<Potion>> potion = potionComponent.potion();
+                    if (potion.isPresent()) {
+                        itemId.append("#");
+                        itemId.append(potion.get().getIdAsString().replace("minecraft:", ""));
+                    }
+                }
+            }
+        }
+
+        if (itemId.toString().equals("minecraft:firework_rocket")) {
+            CastiaUtils.LOGGER.info(item.getComponents());
+            for (Component<?> component : item.getComponents()) {
+                if (component.type() == DataComponentTypes.FIREWORKS && component.value() instanceof FireworksComponent fireworksComponent) {
+                    itemId.append("#").append(fireworksComponent.flightDuration());
                 }
             }
         }
