@@ -12,8 +12,10 @@ import net.minecraft.util.Formatting;
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 
 public class ItemShopTooltip {
     @Setter
@@ -41,7 +43,7 @@ public class ItemShopTooltip {
 
                 if (offers.isEmpty()) return;
 
-                DecimalFormat df = new DecimalFormat("#.##");
+                DecimalFormat df = new DecimalFormat("#,###.#", new DecimalFormatSymbols(Locale.ENGLISH));
                 df.setRoundingMode(RoundingMode.CEILING);
 
                 offers.sort(Comparator.comparing(Offer::getSellPrice));

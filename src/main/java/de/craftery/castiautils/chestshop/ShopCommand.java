@@ -25,10 +25,8 @@ import red.jackf.whereisit.client.render.Rendering;
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
-import java.util.ArrayDeque;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.text.DecimalFormatSymbols;
+import java.util.*;
 
 import static net.fabricmc.fabric.api.client.command.v2.ClientCommandManager.*;
 
@@ -235,7 +233,7 @@ public class ShopCommand {
 
             MutableText base = Text.empty();
 
-            DecimalFormat df = new DecimalFormat("#.##");
+            DecimalFormat df = new DecimalFormat("#,###.#", new DecimalFormatSymbols(Locale.ENGLISH));
             df.setRoundingMode(RoundingMode.CEILING);
 
             if (buy) {

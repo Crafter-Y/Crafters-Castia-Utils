@@ -25,9 +25,14 @@ If you want a token to play around, I might provide you one if you message me in
 
 Planned features:
 
+- periodically fetch for data
+- potion tags
+- firework rocket level
+- Latest auction house entry (with full description) in tooltip
 - Web frontend to view itemprices and money gathering opportunities
 - Personal chat history (see what someone said in the past)
 - Personal money history (see your money history and other's as well)
+- fallen town logs
 
 ## Modpacks
 

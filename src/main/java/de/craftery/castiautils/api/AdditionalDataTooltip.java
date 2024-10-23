@@ -15,6 +15,7 @@ import net.minecraft.util.Formatting;
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.util.*;
 
 public class AdditionalDataTooltip {
@@ -75,7 +76,7 @@ public class AdditionalDataTooltip {
             tooltip.add(loading);
             return tooltip;
         }
-        DecimalFormat df = new DecimalFormat("#.##");
+        DecimalFormat df = new DecimalFormat("#,###.#", new DecimalFormatSymbols(Locale.ENGLISH));
         df.setRoundingMode(RoundingMode.CEILING);
 
         if (cache.hasBuyOfferData() || cache.hasSellOfferData() || cache.hasAuctionData()) {

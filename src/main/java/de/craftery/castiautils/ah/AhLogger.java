@@ -5,8 +5,6 @@ import de.craftery.castiautils.CastiaUtils;
 import de.craftery.castiautils.api.AdditionalDataTooltip;
 import de.craftery.castiautils.api.RequestService;
 import de.craftery.castiautils.chestshop.ShopLogger;
-import lombok.Getter;
-import lombok.Setter;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
@@ -17,6 +15,7 @@ import net.minecraft.text.Text;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -32,7 +31,10 @@ public class AhLogger {
             if (commitPendingIn > 0) {
                 commitPendingIn--;
                 if (commitPendingIn == 0) {
-                    RequestService.put("auction", pendingOffers.toArray());
+                    Optional<String> response = RequestService.put("auction", pendingOffers.toArray());
+                    if (response.isPresent()) {
+                        CastiaUtils.LOGGER.error("Auction contribution failed: " + response.get());
+                    }
                     for (AhOffer offer : pendingOffers) {
                         AdditionalDataTooltip.invalidateCache(offer.getItem());
                     }
