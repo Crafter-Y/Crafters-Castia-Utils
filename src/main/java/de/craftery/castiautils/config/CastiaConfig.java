@@ -1,5 +1,6 @@
 package de.craftery.castiautils.config;
 
+import de.craftery.castiautils.api.RefetchPeriod;
 import me.shedaniel.autoconfig.ConfigData;
 import me.shedaniel.autoconfig.annotation.Config;
 import me.shedaniel.autoconfig.annotation.ConfigEntry;
@@ -93,6 +94,10 @@ public class CastiaConfig implements ConfigData {
     @ConfigEntry.Category("api")
     @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
     public DataSource dataSource = DataSource.LOCAL_ONLY;
+
+    @ConfigEntry.Category("api")
+    @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
+    public RefetchPeriod periodicallyRefetchData = RefetchPeriod.OFF;
 
     @ConfigEntry.Category("api")
     @ConfigEntry.Gui.Tooltip

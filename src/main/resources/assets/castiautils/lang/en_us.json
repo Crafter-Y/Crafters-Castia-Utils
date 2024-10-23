@@ -70,6 +70,7 @@
   "text.autoconfig.castiautils.option.token": "API Token",
   "text.autoconfig.castiautils.option.token.@Tooltip": "This is needed to use the API. DM me ingame or on DC @crafter_y",
   "text.autoconfig.castiautils.option.dataSource": "Chestshop source",
+  "text.autoconfig.castiautils.option.periodicallyRefetchData": "Periodically refetch data from API",
   "text.autoconfig.castiautils.option.contributeShops": "Contribute shops",
   "text.autoconfig.castiautils.option.contributeShops.@Tooltip": "Contribute shops to the public dataset. Your token needs the permission to do that.",
   "text.autoconfig.castiautils.option.contributeOffers": "Contribute chestshop offers",
