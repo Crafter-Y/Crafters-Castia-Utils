@@ -141,10 +141,40 @@ public class ShopLogger {
         }
 
         if (itemId.toString().equals("minecraft:firework_rocket")) {
-            CastiaUtils.LOGGER.info(item.getComponents());
             for (Component<?> component : item.getComponents()) {
                 if (component.type() == DataComponentTypes.FIREWORKS && component.value() instanceof FireworksComponent fireworksComponent) {
                     itemId.append("#").append(fireworksComponent.flightDuration());
+                }
+            }
+        }
+
+        if (itemId.toString().endsWith("shulker_box")) {
+            outer:
+            for (Component<?> component : item.getComponents()) {
+                if (component.type() == DataComponentTypes.CONTAINER && component.value() instanceof ContainerComponent containerComponent) {
+                    List<ItemStack> contents = containerComponent.stream().toList();
+                    itemId.append("#");
+
+                    if (contents.isEmpty()) {
+                        itemId.append("empty");
+                        continue;
+                    }
+                    if (contents.size() != 27) {
+                        itemId.append("mixed");
+                        continue;
+                    }
+                    String currentItemId = getItemId(contents.getFirst());
+                    for (ItemStack stack : contents) {
+                        if (stack.getCount() != stack.getItem().getMaxCount()) {
+                            itemId.append("mixed");
+                            continue outer;
+                        }
+                        if (!getItemId(stack).equals(currentItemId)) {
+                            itemId.append("mixed");
+                            continue outer;
+                        }
+                    }
+                    itemId.append(currentItemId.replace("minecraft:", ""));
                 }
             }
         }
