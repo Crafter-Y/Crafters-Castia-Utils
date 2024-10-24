@@ -127,7 +127,7 @@ public class AdditionalDataTooltip {
             tooltip.add(sellOffer);
         }
         if (cache.hasAuctionData()) {
-            MutableText sellOffer = Text.literal("Auction ").formatted(Formatting.GRAY)
+            MutableText auctions = Text.literal("Auction ").formatted(Formatting.GRAY)
                     .append(Text.literal(df.format(cache.minAuction)).formatted(Formatting.GOLD))
                     .append(Text.literal("/").formatted(Formatting.DARK_GRAY))
                     .append(Text.literal(df.format(cache.l25Auction)).formatted(Formatting.GOLD))
@@ -139,7 +139,19 @@ public class AdditionalDataTooltip {
                     .append(Text.literal(df.format(cache.u25Auction)).formatted(Formatting.GOLD))
                     .append(Text.literal("/").formatted(Formatting.DARK_GRAY))
                     .append(Text.literal(df.format(cache.maxAuction)).formatted(Formatting.GOLD));
-            tooltip.add(sellOffer);
+            tooltip.add(auctions);
+
+            if(cache.lastAuctionPrice != null || cache.lastAuctionAmount != null) {
+                MutableText lastAuction = Text.literal("Last Auction: ").formatted(Formatting.GRAY)
+                        .append(Text.literal(cache.lastAuctionAmount + "x ").formatted(Formatting.AQUA))
+                        .append(Text.literal("for ").formatted(Formatting.GRAY))
+                        .append(Text.literal("$" + df.format(cache.lastAuctionPrice)).formatted(Formatting.GOLD))
+                        .append(Text.literal(" (").formatted(Formatting.GRAY))
+                        .append(Text.literal("$" + df.format(cache.lastAuctionPrice/cache.lastAuctionAmount)).formatted(Formatting.GOLD))
+                        .append(Text.literal("/pc").formatted(Formatting.DARK_GRAY))
+                        .append(Text.literal(")").formatted(Formatting.GRAY));
+                tooltip.add(lastAuction);
+            }
         }
 
         return tooltip;
@@ -178,6 +190,9 @@ public class AdditionalDataTooltip {
         private Float medAuction;
         private Float u25Auction;
         private Float maxAuction;
+        private Long lastAuctionUnix;
+        private Float lastAuctionPrice;
+        private Integer lastAuctionAmount;
 
         public CachedAdditionalTooltip(String item) {
             this.item = item;
