@@ -2,6 +2,7 @@ package de.craftery.castiautils.ah;
 
 import blue.endless.jankson.annotation.Nullable;
 import de.craftery.castiautils.CastiaUtils;
+import de.craftery.castiautils.CastiaUtilsException;
 import de.craftery.castiautils.api.AdditionalDataTooltip;
 import de.craftery.castiautils.api.RequestService;
 import de.craftery.castiautils.chestshop.ShopLogger;
@@ -15,7 +16,6 @@ import net.minecraft.text.Text;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -31,10 +31,12 @@ public class AhLogger {
             if (commitPendingIn > 0) {
                 commitPendingIn--;
                 if (commitPendingIn == 0) {
-                    Optional<String> response = RequestService.put("auction", pendingOffers.toArray());
-                    if (response.isPresent()) {
-                        CastiaUtils.LOGGER.error("Auction contribution failed: " + response.get());
+                    try {
+                        RequestService.put("auction", pendingOffers.toArray());
+                    } catch (CastiaUtilsException e) {
+                        CastiaUtils.LOGGER.error("Auction contribution failed: " + e.getMessage());
                     }
+
                     for (AhOffer offer : pendingOffers) {
                         AdditionalDataTooltip.invalidateCache(offer.getItem());
                     }

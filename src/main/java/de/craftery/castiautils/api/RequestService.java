@@ -3,173 +3,105 @@ package de.craftery.castiautils.api;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import de.craftery.castiautils.CastiaUtils;
+import de.craftery.castiautils.CastiaUtilsException;
 import de.craftery.castiautils.config.CastiaConfig;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.Jankson;
-import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.JsonElement;
+import com.google.gson.JsonElement;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.*;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.HttpClientBuilder;
+import org.jetbrains.annotations.Nullable;
 import oshi.annotation.concurrent.NotThreadSafe;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
-import java.util.Optional;
 
 public class RequestService {
-    public static Optional<String> put(String route, Object data) {
-        if (!checkApiPrerequisites()) return Optional.of("API token or URL empty");
+    public static void put(String route, Object data) throws CastiaUtilsException {
         CastiaConfig config = CastiaUtils.getConfig();
+        HttpPut put = new HttpPut(config.apiUrl + route);
+        perform(put, false, null, data);
+    }
+
+    public static JsonElement get(String route, Object data) throws CastiaUtilsException {
+        CastiaConfig config = CastiaUtils.getConfig();
+        HttpGetWithBody get = new HttpGetWithBody(config.apiUrl + route);
+        return perform(get, true, null, data);
+    }
+
+    public static JsonElement get(String route) throws CastiaUtilsException {
+        return get(route, null);
+    }
+
+    public static void post(String route, JsonObject uniqueIdentifier, Object data) throws CastiaUtilsException {
+        CastiaConfig config = CastiaUtils.getConfig();
+        HttpPost post = new HttpPost(config.apiUrl + route);
+        perform(post, false, uniqueIdentifier, data);
+    }
+
+    public static void delete(String route, JsonObject uniqueIdentifier) throws CastiaUtilsException {
+        CastiaConfig config = CastiaUtils.getConfig();
+        HttpDeleteWithBody delete = new HttpDeleteWithBody(config.apiUrl + route);
+        perform(delete, false, uniqueIdentifier, null);
+    }
+
+    private static @Nullable JsonElement perform(HttpEntityEnclosingRequestBase request, boolean expectResponse, JsonObject uniqueIdentifier, Object data) throws CastiaUtilsException {
+        CastiaConfig config = CastiaUtils.getConfig();
+        if (config.apiUrl.isEmpty() || config.token.isEmpty()) throw new CastiaUtilsException("API token or URL empty");
+
         Gson gson = new Gson();
 
         try {
+            if (uniqueIdentifier != null) {
+                JsonObject requestBody = new JsonObject();
+                requestBody.add("uniqueIdentifier", uniqueIdentifier);
+                if (data != null) {
+                    JsonElement inputJson = gson.toJsonTree(data);
+                    requestBody.add("data", inputJson);
+                }
+                StringEntity requestBodyString = new StringEntity(requestBody.toString());
+                request.setEntity(requestBodyString);
+            } else if (data != null) {
+                Jankson jankson = Jankson.builder().build();
+                me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.JsonElement inputJson = jankson.toJson(data);
+                StringEntity postingString = new StringEntity(inputJson.toJson());
+                request.setEntity(postingString);
+            }
+        } catch (UnsupportedEncodingException e) {
+            throw new CastiaUtilsException("Could not encode request: " + e.getMessage());
+        }
+
+        request.setHeader("Accept", "application/json");
+        request.setHeader("Content-type", "application/json");
+        request.setHeader("Authorization","Bearer " + config.token);
+
+        try {
             HttpClient httpClient = HttpClientBuilder.create().build();
-            HttpPut put = new HttpPut(config.apiUrl + route);
-            Jankson jankson = Jankson.builder().build();
-            JsonElement inputJson = jankson.toJson(data);
-            StringEntity postingString = new StringEntity(inputJson.toJson());
-            put.setEntity(postingString);
-            put.setHeader("Content-type", "application/json");
-            put.setHeader("Authorization","Bearer " + config.token);
-            HttpResponse response = httpClient.execute(put);
+            HttpResponse response = httpClient.execute(request);
             String responseString = new BasicResponseHandler().handleResponse(response);
             ApiDefaultResponse json = gson.fromJson(responseString, RequestService.ApiDefaultResponse.class);
-            if (json.success) {
-                return Optional.empty();
+
+            if (json.success && !expectResponse) {
+                return null;
             }
-            ApiResponseWithData errorJson = gson.fromJson(responseString, RequestService.ApiResponseWithData.class);
 
-            return Optional.of(gson.toJson(errorJson.data));
-        } catch (IOException e) {
-            return Optional.of(e.getMessage());
-        }
-    }
+            ApiResponseWithData responseObject = gson.fromJson(responseString, RequestService.ApiResponseWithData.class);
 
-    public static ApiResponseWithData get(String route, Object data) {
-        Gson gson = new Gson();
-        if (!checkApiPrerequisites()) {
-            JsonObject jso = new JsonObject();
-            jso.addProperty("error", "API token or URL empty");
-            return new ApiResponseWithData(false, jso);
-        }
-        CastiaConfig config = CastiaUtils.getConfig();
-
-        try {
-            HttpClient httpClient = HttpClientBuilder.create().build();
-            HttpGetWithBody get = new HttpGetWithBody(config.apiUrl + route);
-            Jankson jankson = Jankson.builder().build();
-            JsonElement inputJson = jankson.toJson(data);
-            StringEntity postingString = new StringEntity(inputJson.toJson());
-            get.setEntity(postingString);
-            get.setHeader("Accept", "application/json");
-            get.setHeader("Content-type", "application/json");
-            get.setHeader("Authorization","Bearer " + config.token);
-            HttpResponse response = httpClient.execute(get);
-            String responseString = new BasicResponseHandler().handleResponse(response);
-            return gson.fromJson(responseString, RequestService.ApiResponseWithData.class);
-        } catch (IOException e) {
-            JsonObject jso = new JsonObject();
-            jso.addProperty("error", e.getMessage());
-            return new ApiResponseWithData(false, jso);
-        }
-    }
-
-    public static ApiResponseWithData get(String route) {
-        Gson gson = new Gson();
-        if (!checkApiPrerequisites()) {
-            JsonObject jso = new JsonObject();
-            jso.addProperty("error", "API token or URL empty");
-            return new ApiResponseWithData(false, jso);
-        }
-        CastiaConfig config = CastiaUtils.getConfig();
-
-        try {
-            HttpClient httpClient = HttpClientBuilder.create().build();
-            HttpGet get = new HttpGet(config.apiUrl + route);
-            get.setHeader("Accept", "application/json");
-            get.setHeader("Authorization","Bearer " + config.token);
-            HttpResponse response = httpClient.execute(get);
-            String responseString = new BasicResponseHandler().handleResponse(response);
-            return gson.fromJson(responseString, RequestService.ApiResponseWithData.class);
-        } catch (IOException e) {
-            JsonObject jso = new JsonObject();
-            jso.addProperty("error", e.getMessage());
-            return new ApiResponseWithData(false, jso);
-        }
-    }
-
-    public static Optional<String> post(String route, JsonObject uniqueIdentifier, Object data) {
-        if (!checkApiPrerequisites()) return Optional.of("API token or URL empty");
-        CastiaConfig config = CastiaUtils.getConfig();
-        Gson gson = new Gson();
-
-        try {
-            HttpClient httpClient = HttpClientBuilder.create().build();
-            HttpPost post = new HttpPost(config.apiUrl + route);
-            com.google.gson.JsonElement inputJson = gson.toJsonTree(data);
-
-            JsonObject object = new JsonObject();
-            object.add("uniqueIdentifier", uniqueIdentifier);
-            object.add("data", inputJson);
-
-            StringEntity postingString = new StringEntity(object.toString());
-            post.setEntity(postingString);
-            post.setHeader("Content-type", "application/json");
-            post.setHeader("Authorization","Bearer " + config.token);
-            HttpResponse response = httpClient.execute(post);
-            String responseString = new BasicResponseHandler().handleResponse(response);
-            ApiDefaultResponse json = gson.fromJson(responseString, RequestService.ApiDefaultResponse.class);
-            if (json.success) {
-                return Optional.empty();
+            if (!responseObject.success) {
+                throw new CastiaUtilsException(responseObject.data.toString());
             }
-            ApiResponseWithData errorJson = gson.fromJson(responseString, RequestService.ApiResponseWithData.class);
 
-            return Optional.of(gson.toJson(errorJson.data));
+            return responseObject.data;
         } catch (IOException e) {
-            return Optional.of(e.getMessage());
+            throw new RuntimeException(e);
         }
-    }
-
-    public static Optional<String> delete(String route, JsonObject uniqueIdentifier) {
-        if (!checkApiPrerequisites()) return Optional.of("API token or URL empty");
-        CastiaConfig config = CastiaUtils.getConfig();
-        Gson gson = new Gson();
-
-        try {
-            HttpClient httpClient = HttpClientBuilder.create().build();
-            HttpDeleteWithBody delete = new HttpDeleteWithBody(config.apiUrl + route);
-
-            JsonObject object = new JsonObject();
-            object.add("uniqueIdentifier", uniqueIdentifier);
-
-            StringEntity postingString = new StringEntity(object.toString());
-            delete.setEntity(postingString);
-            delete.setHeader("Content-type", "application/json");
-            delete.setHeader("Authorization","Bearer " + config.token);
-            HttpResponse response = httpClient.execute(delete);
-            String responseString = new BasicResponseHandler().handleResponse(response);
-            ApiDefaultResponse json = gson.fromJson(responseString, RequestService.ApiDefaultResponse.class);
-            if (json.success) {
-                return Optional.empty();
-            }
-            ApiResponseWithData errorJson = gson.fromJson(responseString, RequestService.ApiResponseWithData.class);
-
-            return Optional.of(gson.toJson(errorJson.data));
-        } catch (IOException e) {
-            return Optional.of(e.getMessage());
-        }
-    }
-
-    private static boolean checkApiPrerequisites() {
-        CastiaConfig config = CastiaUtils.getConfig();
-
-        if (config.apiUrl.isEmpty()) return false;
-        return !config.token.isEmpty();
     }
 
     private static class ApiDefaultResponse {
@@ -181,7 +113,7 @@ public class RequestService {
     @Data
     public static class ApiResponseWithData {
         private boolean success;
-        private com.google.gson.JsonElement data;
+        private JsonElement data;
     }
 
     // https://daweini.wordpress.com/2013/12/20/apache-httpclient-send-entity-body-in-a-http-delete-request/

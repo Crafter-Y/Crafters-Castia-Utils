@@ -1,6 +1,7 @@
 package de.craftery.castiautils.api;
 
 import de.craftery.castiautils.CastiaUtils;
+import de.craftery.castiautils.CastiaUtilsException;
 import de.craftery.castiautils.Messages;
 import de.craftery.castiautils.chestshop.ShopConfig;
 import de.craftery.castiautils.config.CastiaConfig;
@@ -8,8 +9,6 @@ import de.craftery.castiautils.config.DataSource;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
-
-import java.util.Optional;
 
 public class RefetchService {
     private static int lastFetchTicksAgo = 0;
@@ -26,30 +25,31 @@ public class RefetchService {
 
                 new Thread(() -> {
                     ShopConfig.writeState();
-                    Optional<String> loadError = ShopConfig.load();
-
-                    CastiaUtils.logOptional(loadError);
-                    if (loadError.isEmpty()) {
-                        CastiaUtils.LOGGER.info("reloaded data");
-                    }
 
                     ClientPlayerEntity player = MinecraftClient.getInstance().player;
-                    if (player != null && config.devMode) {
-                        if (loadError.isPresent()) {
-                            Messages.sendPlayerMessage(player, "reloadFailed", loadError.get());
-                        } else if (config.dataSource == DataSource.LOCAL_ONLY) {
-                            Messages.sendPlayerMessage(player, "reloadedLocal");
-                        } else if (config.dataSource == DataSource.SERVER_ONLY) {
-                            Messages.sendPlayerMessage(player, "reloadedServer");
-                        } else {
-                            Messages.sendPlayerMessage(player, "reloadedMerge");
+                    try {
+                        ShopConfig.load();
+                        CastiaUtils.LOGGER.info("reloaded data");
+
+                        if (player != null && config.devMode) {
+                            if (config.dataSource == DataSource.LOCAL_ONLY) {
+                                Messages.sendPlayerMessage(player, "reloadedLocal");
+                            } else if (config.dataSource == DataSource.SERVER_ONLY) {
+                                Messages.sendPlayerMessage(player, "reloadedServer");
+                            } else {
+                                Messages.sendPlayerMessage(player, "reloadedMerge");
+                            }
+                        }
+                    } catch (CastiaUtilsException e) {
+                        CastiaUtils.LOGGER.error(e.getMessage());
+                        if (player != null && config.devMode) {
+                            Messages.sendPlayerMessage(player, "reloadFailed", e.getMessage());
                         }
                     }
 
                     AdditionalDataTooltip.invalidateAll();
                 }).start();
             }
-
         });
     }
 }

@@ -1,6 +1,7 @@
 package de.craftery.castiautils.chestshop;
 
 import de.craftery.castiautils.CastiaUtils;
+import de.craftery.castiautils.CastiaUtilsException;
 import de.craftery.castiautils.Messages;
 import de.craftery.castiautils.api.AdditionalDataTooltip;
 import de.craftery.castiautils.api.RequestService;
@@ -291,12 +292,12 @@ public class ShopLogger {
         final Offer offerToSend = SerializationUtils.clone(offer);
         new Thread(() -> {
             if (CastiaUtils.getConfig().contributeOffers) {
-                Optional<String> optional = RequestService.post("offer", offerToSend.getUniqueIdentifier(), offerToSend);
-                if (optional.isEmpty()) {
+                try {
+                    RequestService.post("offer", offerToSend.getUniqueIdentifier(), offerToSend);
                     player.sendMessage(Text.literal(selectedShop + " " + itemId + " (" + buyPrice + ", " + sellPrice + ") (synced)"), true);
                     AdditionalDataTooltip.invalidateCache(offerToSend.getItem());
-                } else {
-                    CastiaUtils.LOGGER.error(optional.get());
+                } catch (CastiaUtilsException e) {
+                    CastiaUtils.LOGGER.error("Sync failed because of: " + e.getMessage());
                     player.sendMessage(Text.literal(selectedShop + " " + itemId + " (" + buyPrice + ", " + sellPrice + ") (sync failed)"), true);
                 }
             } else {
@@ -347,18 +348,13 @@ public class ShopLogger {
         Offer shop = getOfferAtPlayer();
         if (shop != null) {
             shop.setEmpty(false);
+            shop.setFull(false);
             triggerApiUpdate(shop);
         }
     }
 
     public static void onSoldMessage() {
-        if (!CastiaUtils.getConfig().chestshopDataCollection) return;
-
-        Offer shop = getOfferAtPlayer();
-        if (shop != null) {
-            shop.setFull(false);
-            triggerApiUpdate(shop);
-        }
+        onBoughtMessage();
     }
 
     public static void onNotEnoughFunds() {
@@ -368,12 +364,14 @@ public class ShopLogger {
     private static void triggerApiUpdate(Offer offer) {
         new Thread(() -> {
             if (CastiaUtils.getConfig().contributeOffers) {
-                Optional<String> optional = RequestService.post("offer", offer.getUniqueIdentifier(), offer);
-                if (optional.isPresent()) {
+                try {
+                    RequestService.post("offer", offer.getUniqueIdentifier(), offer);
+                } catch (CastiaUtilsException e) {
                     ClientPlayerEntity player = MinecraftClient.getInstance().player;
                     if (player == null) return;
-                    Messages.sendPlayerMessage(player, "syncFailed", optional.get());
+                    Messages.sendPlayerMessage(player, "syncFailed", e.getMessage());
                 }
+
                 AdditionalDataTooltip.invalidateCache(offer.getItem());
             }
         }).start();

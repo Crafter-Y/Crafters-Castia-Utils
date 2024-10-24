@@ -1,7 +1,9 @@
 package de.craftery.castiautils.api;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import de.craftery.castiautils.CastiaUtils;
+import de.craftery.castiautils.CastiaUtilsException;
 import de.craftery.castiautils.chestshop.ItemShopTooltip;
 import de.craftery.castiautils.chestshop.ShopLogger;
 import lombok.Data;
@@ -44,16 +46,16 @@ public class AdditionalDataTooltip {
                     }
 
                     new Thread(() -> {
-                        RequestService.ApiResponseWithData tooltipRequest = RequestService.get("tooltip", items.toArray());
-                        if (!tooltipRequest.isSuccess()) {
-                            CastiaUtils.LOGGER.error("Failed to load tooltips: " + tooltipRequest.getData().toString());
-                            return;
-                        }
-                        Gson gson = new Gson();
-                        List<CachedAdditionalTooltip> tooltipData = new ArrayList<>(Arrays.stream(gson.fromJson(tooltipRequest.getData(), CachedAdditionalTooltip[].class)).toList());
-                        for (CachedAdditionalTooltip tooltip : tooltipData) {
-                            tooltip.setLoaded(true);
-                            cachedTooltips.put(tooltip.getItem(), tooltip);
+                        try {
+                            JsonElement tooltipResponse = RequestService.get("tooltip", items.toArray());
+                            Gson gson = new Gson();
+                            List<CachedAdditionalTooltip> tooltipData = new ArrayList<>(Arrays.stream(gson.fromJson(tooltipResponse, CachedAdditionalTooltip[].class)).toList());
+                            for (CachedAdditionalTooltip tooltip : tooltipData) {
+                                tooltip.setLoaded(true);
+                                cachedTooltips.put(tooltip.getItem(), tooltip);
+                            }
+                        } catch (CastiaUtilsException e) {
+                            CastiaUtils.LOGGER.error("Failed to load tooltips: " + e.getMessage());
                         }
                     }).start();
                 }

@@ -1,13 +1,14 @@
 package de.craftery.castiautils.chestshop;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonSyntaxException;
 import de.craftery.castiautils.CastiaUtils;
+import de.craftery.castiautils.CastiaUtilsException;
 import de.craftery.castiautils.api.RequestService;
 import de.craftery.castiautils.config.CastiaConfig;
 import de.craftery.castiautils.config.DataSource;
 import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.Jankson;
-import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.JsonElement;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import org.apache.commons.io.FileUtils;
@@ -16,14 +17,15 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class ShopConfig {
-    public static Optional<String> load() {
+    public static void load() throws CastiaUtilsException {
         CastiaConfig config = CastiaUtils.getConfig();
         Gson gson = new Gson();
 
@@ -36,10 +38,8 @@ public class ShopConfig {
                     List<Offer> offers = new ArrayList<>(Arrays.stream(offersArr).toList());
                     Offer.setOffers(offers);
                 }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            } catch (JsonSyntaxException e) {
-                return Optional.of("Could not load offers.json5: " + e.getMessage());
+            } catch (JsonSyntaxException | IOException e) {
+                throw new CastiaUtilsException("Could not load offers.json5: " + e.getMessage());
             }
 
             try {
@@ -49,42 +49,39 @@ public class ShopConfig {
                     List<Shop> shops = new ArrayList<>(Arrays.stream(shopArr).toList());
                     Shop.setShops(shops);
                 }
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            } catch (JsonSyntaxException e) {
-                return Optional.of("Could not load shops.json5: " + e.getMessage());
+            } catch (JsonSyntaxException | IOException e) {
+                throw new CastiaUtilsException("Could not load shops.json5: " + e.getMessage());
             }
         }
-        if (config.dataSource == DataSource.LOCAL_ONLY) return Optional.empty();
+        if (config.dataSource == DataSource.LOCAL_ONLY) return;
 
-        RequestService.ApiResponseWithData shopData = RequestService.get("shop");
-        if (!shopData.isSuccess()) {
-            return Optional.of("Failed to load shops from API: " + shopData.getData().toString());
+        try {
+            JsonElement shopData = RequestService.get("shop");
+            List<Shop> shops = new ArrayList<>(Arrays.stream(gson.fromJson(shopData, Shop[].class)).toList());
+            if (config.dataSource == DataSource.SERVER_ONLY) {
+                CastiaUtils.LOGGER.info("Loading data from API");
+                Shop.setShops(shops);
+            } else {
+                CastiaUtils.LOGGER.info("Merging data from API");
+                Shop.mergeIncoming(shops);
+            }
+        } catch (CastiaUtilsException e) {
+            throw new CastiaUtilsException("Failed to load shops from API: " + e.getMessage());
         }
 
-        List<Shop> shops = new ArrayList<>(Arrays.stream(gson.fromJson(shopData.getData(), Shop[].class)).toList());
-        if (config.dataSource == DataSource.SERVER_ONLY) {
-            CastiaUtils.LOGGER.info("Loading data from API");
-            Shop.setShops(shops);
-        } else {
-            CastiaUtils.LOGGER.info("Merging data from API");
-            Shop.mergeIncoming(shops);
+        try {
+            JsonElement offerData = RequestService.get("offer");
+            List<Offer> offers = new ArrayList<>(Arrays.stream(gson.fromJson(offerData, Offer[].class)).toList());
+            if (config.dataSource == DataSource.SERVER_ONLY) {
+                CastiaUtils.LOGGER.info("Loading data from API");
+                Offer.setOffers(offers);
+            } else {
+                CastiaUtils.LOGGER.info("Merging data from API");
+                Offer.mergeIncoming(offers);
+            }
+        } catch (CastiaUtilsException e) {
+            throw new CastiaUtilsException("Failed to load offers from API: " + e.getMessage());
         }
-
-        RequestService.ApiResponseWithData offerData = RequestService.get("offer");
-        if (!offerData.isSuccess()) {
-            return Optional.of("Failed to load offers from API: " + offerData.getData().toString());
-        }
-
-        List<Offer> offers = new ArrayList<>(Arrays.stream(gson.fromJson(offerData.getData(), Offer[].class)).toList());
-        if (config.dataSource == DataSource.SERVER_ONLY) {
-            CastiaUtils.LOGGER.info("Loading data from API");
-            Offer.setOffers(offers);
-        } else {
-            CastiaUtils.LOGGER.info("Merging data from API");
-            Offer.mergeIncoming(offers);
-        }
-        return Optional.empty();
     }
 
     public static void register() {
@@ -108,8 +105,8 @@ public class ShopConfig {
             CastiaUtils.LOGGER.info("Saving data to local storage");
 
             Jankson jankson = Jankson.builder().build();
-            JsonElement offers = jankson.toJson(Offer.getAll().toArray());
-            JsonElement shops = jankson.toJson(Shop.getAll().toArray());
+            me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.JsonElement offers = jankson.toJson(Offer.getAll().toArray());
+            me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.JsonElement shops = jankson.toJson(Shop.getAll().toArray());
 
             BufferedWriter offersWriter;
             BufferedWriter shopsWriter;
@@ -128,8 +125,9 @@ public class ShopConfig {
     }
 
     private static File getConfigFile(String filename) {
-        filename = "./config/" + filename;
+        filename = "./config/castiautils/" + filename;
         try {
+            Files.createDirectories(Paths.get("./config/castiautils/"));
             File myObj = new File(filename);
             boolean ignored = myObj.createNewFile();
             return myObj;

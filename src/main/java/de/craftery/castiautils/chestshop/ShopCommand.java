@@ -3,12 +3,12 @@ package de.craftery.castiautils.chestshop;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import de.craftery.castiautils.CastiaUtils;
+import de.craftery.castiautils.CastiaUtilsException;
 import de.craftery.castiautils.Messages;
 import de.craftery.castiautils.api.AdditionalDataTooltip;
 import de.craftery.castiautils.api.RequestService;
 import de.craftery.castiautils.config.CastiaConfig;
 import de.craftery.castiautils.config.DataSource;
-import me.shedaniel.autoconfig.AutoConfig;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.MinecraftClient;
@@ -90,7 +90,7 @@ public class ShopCommand {
                                 .then(argument("offerId", StringArgumentType.word())
                                         .executes(context -> {
                                             String offerId = StringArgumentType.getString(context, "offerId");
-                                            tp(context, offerId);
+                                            tp(offerId);
                                             return 1;
                                         }).suggests((context, builder) -> {
                                             for (String item : Offer.getAll().stream().map(Offer::getItem).distinct().toList()) {
@@ -148,11 +148,11 @@ public class ShopCommand {
         ShopLogger.setSelectedShop(name);
 
         if (CastiaUtils.getConfig().contributeShops) {
-            Optional<String> optional = RequestService.put("shop", shop);
-            if (optional.isEmpty()) {
+            try {
+                RequestService.put("shop", shop);
                 Messages.sendCommandFeedback(context, "successfulContribution");
-            } else {
-                Messages.sendCommandFeedback(context, "failedContribution", optional.get());
+            } catch (CastiaUtilsException e) {
+                Messages.sendCommandFeedback(context, "failedContribution", e.getMessage());
             }
         }
 
@@ -182,7 +182,7 @@ public class ShopCommand {
             } catch (NumberFormatException ignored) {}
         }
 
-        List<Offer> shops = Offer.getByItem(itemName).stream().filter(shop -> shop.getBuyPrice() != null).sorted((a, b) -> a.getBuyPrice() > b.getBuyPrice() ? 1 : -1).toList();
+        List<Offer> shops = Offer.getByItem(itemName).stream().filter(shop -> shop.getBuyPrice() != null).sorted((a, b) -> a.getBuyPrice() > b.getBuyPrice() ? 1 : -1).toList(); // TODO: Comparator.comparing()
 
         if (shops.isEmpty()) {
             Messages.sendCommandFeedback(context, "shopNotFound", itemName);
@@ -202,7 +202,7 @@ public class ShopCommand {
             } catch (NumberFormatException ignored) {}
         }
 
-        List<Offer> shops = Offer.getByItem(itemName).stream().filter(shop -> shop.getSellPrice() != 0).sorted((a, b) -> a.getSellPrice() < b.getSellPrice() ? 1 : -1).toList();
+        List<Offer> shops = Offer.getByItem(itemName).stream().filter(shop -> shop.getSellPrice() != 0).sorted((a, b) -> a.getSellPrice() < b.getSellPrice() ? 1 : -1).toList(); // TODO: Comparator.comparing()
 
         if (shops.isEmpty()) {
             Messages.sendCommandFeedback(context, "shopNotFound", itemName);
@@ -302,9 +302,10 @@ public class ShopCommand {
             shop.delete();
 
             if (CastiaUtils.getConfig().contributeOffers) {
-                Optional<String> optional = RequestService.delete("offer", shop.getUniqueIdentifier());
-                if (optional.isPresent()) {
-                    Messages.sendCommandFeedback(context, "deleteApiRequestFailed", optional.get());
+                try {
+                    RequestService.delete("offer", shop.getUniqueIdentifier());
+                } catch (CastiaUtilsException e) {
+                    Messages.sendCommandFeedback(context, "deleteApiRequestFailed", e.getMessage());
                 }
             }
 
@@ -312,7 +313,7 @@ public class ShopCommand {
         }
     }
 
-    public static void tp(CommandContext<FabricClientCommandSource> context, String offerId) {
+    public static void tp(String offerId) {
         Offer cs = Offer.getById(offerId);
         if (cs == null) return;
 
@@ -352,18 +353,18 @@ public class ShopCommand {
             Messages.sendCommandFeedback(context, "dontContribute");
             return;
         }
-
-        Optional<String> optional = RequestService.put("shop", Shop.getAll().toArray());
-        if (optional.isEmpty()) {
+        try {
+            RequestService.put("shop", Shop.getAll().toArray());
             Messages.sendCommandFeedback(context, "successfulShopsContribution");
-        } else {
-            Messages.sendCommandFeedback(context, "failedContribution", optional.get());
+        } catch (CastiaUtilsException e) {
+            Messages.sendCommandFeedback(context, "failedContribution", e.getMessage());
         }
-        optional = RequestService.put("offer", Offer.getAll().toArray());
-        if (optional.isEmpty()) {
+
+        try {
+            RequestService.put("offer", Offer.getAll().toArray());
             Messages.sendCommandFeedback(context, "successfulOfferContribution");
-        } else {
-            Messages.sendCommandFeedback(context, "failedContribution", optional.get());
+        } catch (CastiaUtilsException e) {
+            Messages.sendCommandFeedback(context, "failedContribution", e.getMessage());
         }
     }
 
@@ -372,16 +373,18 @@ public class ShopCommand {
 
         new Thread(() -> {
             ShopConfig.writeState();
-            Optional<String> loadError = ShopConfig.load();
+            try {
+                ShopConfig.load();
 
-            if (loadError.isPresent()) {
-                Messages.sendCommandFeedback(context, "reloadFailed", loadError.get());
-            } else if (config.dataSource == DataSource.LOCAL_ONLY) {
-                Messages.sendCommandFeedback(context, "reloadedLocal");
-            } else if (config.dataSource == DataSource.SERVER_ONLY) {
-                Messages.sendCommandFeedback(context, "reloadedServer");
-            } else {
-                Messages.sendCommandFeedback(context, "reloadedMerge");
+                if (config.dataSource == DataSource.LOCAL_ONLY) {
+                    Messages.sendCommandFeedback(context, "reloadedLocal");
+                } else if (config.dataSource == DataSource.SERVER_ONLY) {
+                    Messages.sendCommandFeedback(context, "reloadedServer");
+                } else {
+                    Messages.sendCommandFeedback(context, "reloadedMerge");
+                }
+            } catch (CastiaUtilsException e) {
+                Messages.sendCommandFeedback(context, "reloadFailed", e.getMessage());
             }
 
             AdditionalDataTooltip.invalidateAll();
@@ -402,9 +405,10 @@ public class ShopCommand {
                 deletedCount++;
 
                 if (CastiaUtils.getConfig().contributeOffers) {
-                    Optional<String> optional = RequestService.delete("offer", offer.getUniqueIdentifier());
-                    if (optional.isPresent()) {
-                        Messages.sendCommandFeedback(context, "deleteApiRequestFailed", optional.get());
+                    try {
+                        RequestService.delete("offer", offer.getUniqueIdentifier());
+                    } catch (CastiaUtilsException e) {
+                        Messages.sendCommandFeedback(context, "deleteApiRequestFailed", e.getMessage());
                     }
                 }
             }
