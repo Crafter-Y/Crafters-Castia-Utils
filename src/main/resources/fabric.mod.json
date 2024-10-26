@@ -18,6 +18,9 @@
     ],
     "modmenu": [
       "de.craftery.castiautils.compat.CastiaModMenuIntegration"
+    ],
+    "jade": [
+      "de.craftery.castiautils.compat.JadeIntegration"
     ]
   },
   "mixins": [
@@ -28,7 +31,10 @@
     "fabric": "*",
     "minecraft": "${minecraft_version}",
     "whereisit": "*",
-    "modmenu": ">=11.0.2",
-    "roughlyenoughitems": ">=16.0.783"
+    "modmenu": ">=11.0.2"
+  },
+  "suggests": {
+    "roughlyenoughitems": ">=16.0.783",
+    "jade": "*"
   }
 }

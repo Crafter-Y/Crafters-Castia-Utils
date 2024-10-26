@@ -105,7 +105,7 @@ public class AhLogger {
 
         if (syncId != currentSyncId) return;
 
-        for (int i = 0; i < 45; i++) {
+        for (int i = 0; i < 44; i++) {
             AhOffer offer = parseOffer(data.get(i));
             if (offer != null) queuePendingOffer(offer);
         }

@@ -41,6 +41,12 @@ repositories {
         name 'Xander Maven'
         url 'https://maven.isxander.dev/releases'
     }
+    maven {
+        url "https://www.cursemaven.com"
+        content {
+            includeGroup "curse.maven"
+        }
+    }
 }
 
 dependencies {
@@ -52,12 +58,15 @@ dependencies {
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
     modRuntimeOnly("me.djtheredstoner:DevAuth-fabric:1.2.1")
     modImplementation("com.terraformersmc:modmenu:${project.modmenu_version}")
-    modApi("me.shedaniel.cloth:cloth-config-fabric:15.0.140") {
+    modApi("me.shedaniel.cloth:cloth-config-fabric:${project.cloth_config_version}") {
         exclude(group: "net.fabricmc.fabric-api")
     }
-    modImplementation "red.jackf:whereisit:2.6.3+1.21.1"
-    modCompileOnly "me.shedaniel:RoughlyEnoughItems-api-fabric:16.0.783"
-    modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-fabric:16.0.783"
+    modCompileOnly "red.jackf:whereisit:${project.whereisit_version}"
+    modImplementation "red.jackf:chesttracker:${project.chest_tracker_version}"
+    modRuntimeOnly("me.djtheredstoner:DevAuth-fabric:1.2.1")
+    modCompileOnly "me.shedaniel:RoughlyEnoughItems-api-fabric:${project.rei_version}"
+    modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}"
+    modImplementation "curse.maven:jade-324717:${project.jade_id}"
 
     implementation "blue.endless:jankson:1.2.3"
     implementation 'com.google.code.gson:gson:2.11.0'
