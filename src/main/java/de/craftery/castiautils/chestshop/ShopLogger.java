@@ -182,7 +182,7 @@ public class ShopLogger {
 
         for (Component<?> component : item.getComponents()) {
             if (component.type() == DataComponentTypes.CUSTOM_DATA && component.value() instanceof NbtComponent nbt) {
-                Pattern itemPattern = Pattern.compile("oxywire:item_id\":\"([a-zA-Z\\d]+)\"");
+                Pattern itemPattern = Pattern.compile("oxywire:item_id\":\"([a-zA-Z\\d_]+)\"");
                 Matcher itemMatcher = itemPattern.matcher(nbt.copyNbt().toString());
                 if (itemMatcher.find()) {
                     itemId = new StringBuilder("oxywire:").append(itemMatcher.group(1).toLowerCase());

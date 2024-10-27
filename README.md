@@ -25,7 +25,6 @@ If you want a token to play around, I might provide you one if you message me in
 
 Planned features:
 
-- recognise furniture and hats
 - hotkey for buy sell
 - buy/sell REI integration
 - switch from buy to sell in the /shop <buy/sell> command

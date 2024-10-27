@@ -100,7 +100,7 @@ public class RequestService {
 
             return responseObject.data;
         } catch (IOException e) {
-            throw new RuntimeException(e);
+            throw new CastiaUtilsException("Could not execute request: " + e.getMessage());
         }
     }
 
