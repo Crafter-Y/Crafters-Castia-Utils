@@ -21,6 +21,9 @@
     ],
     "jade": [
       "de.craftery.castiautils.compat.JadeIntegration"
+    ],
+    "chesttracker": [
+      "de.craftery.castiautils.compat.ChestTrackerIntegration"
     ]
   },
   "mixins": [
@@ -35,6 +38,7 @@
   },
   "suggests": {
     "roughlyenoughitems": ">=16.0.783",
-    "jade": "*"
+    "jade": "*",
+    "chesttracker": "*"
   }
 }

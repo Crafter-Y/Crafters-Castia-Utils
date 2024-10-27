@@ -42,17 +42,17 @@ public class Offer implements Serializable {
     }
 
     public static List<Offer> getByItem(String item) {
-        List<Offer> offers = new ArrayList<>();
-        for (Offer offer : Offer.offers) {
+        List<Offer> returnOffers = new ArrayList<>();
+        for (Offer offer : offers) {
             if (offer.item == null) {
                 CastiaUtils.LOGGER.error(offer.getId() + " " + offer.getOwner() + " is null!");
                 continue;
             }
             if (offer.item.equals(item)) {
-                offers.add(offer);
+                returnOffers.add(offer);
             }
         }
-        return offers;
+        return returnOffers;
     }
 
     public static @Nullable Offer getByCoordinate(int x, int y, int z) {

@@ -22,10 +22,12 @@ If you want a token to play around, I might provide you one if you message me in
 - ChestShop Data Collection (Stores every chestshop in a database)
 - Useful Tooltip Data (displays the stack/buy/sell price of every item in its item tag) (some parts require API)
 - Auction house price tracking (requires API)
+- [Chest Tracker](https://modrinth.com/mod/chest-tracker) Integration
 
 Planned features:
 
 - hotkey for buy sell
+- PV Chesttracker integration
 - buy/sell REI integration
 - switch from buy to sell in the /shop <buy/sell> command
 - Web frontend to view itemprices and money gathering opportunities
