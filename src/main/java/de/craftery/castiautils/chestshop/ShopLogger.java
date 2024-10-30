@@ -328,6 +328,7 @@ public class ShopLogger {
         Offer shop = getOfferAtPlayer();
         if (shop != null) {
             shop.setEmpty(true);
+            shop.setFull(false);
             triggerApiUpdate(shop);
         }
     }

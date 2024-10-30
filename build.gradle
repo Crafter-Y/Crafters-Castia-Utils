@@ -16,6 +16,13 @@ loom {
             property("devauth.enabled", "true")
             property("fabric.development", "true")
         }
+        clientProd {
+            property("devauth.enabled", "true")
+            property("fabric.development", "true")
+            runDir = "run/prod"
+            environment("client")
+            defaultMainClass("${project.maven_group}.${project.archives_base_name}.CastiaUtils")
+        }
     }
 }
 

@@ -30,7 +30,7 @@ public class ChestTrackerIntegration implements ChestTrackerPlugin {
         DefaultProviderScreenClose.EVENT.register((provider, context) -> {
             String title = context.getScreen().getTitle().getString();
 
-            if (title.length() == 2 && title.charAt(0) == 57344 & title.charAt(1) == 57856) return ResultHolder.empty();
+            if (title.length() == 2 && title.charAt(0) > 50000 & title.charAt(1) > 50000) return ResultHolder.empty();
 
             if (title.equals("Town Vault")) {
                 if (townVault.get() == 0) {
