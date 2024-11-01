@@ -277,6 +277,22 @@ public class ShopCommand {
         if (page + 1 != maxPage) {
             pages.append(Text.literal(">>>").setStyle(Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/shop " + verb + " " + itemName + " " + (page + 2))).withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.literal("Show page " + (page+2))))).formatted(Formatting.GOLD));
         }
+
+        pages.append(Text.literal(" "));
+
+        String invVerb = buy ?  "sell" : "buy";
+        Style style = Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.RUN_COMMAND, "/shop " + invVerb + " " + itemName));
+
+        if (buy) {
+            style = style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("castiautils.switchToSell")));
+            MutableText text = Text.translatable("castiautils.switchToSell").setStyle(style).formatted(Formatting.LIGHT_PURPLE);
+            pages.append(text);
+        } else {
+            style = style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("castiautils.switchToBuy")));
+            MutableText text = Text.translatable("castiautils.switchToBuy").setStyle(style).formatted(Formatting.LIGHT_PURPLE);
+            pages.append(text);
+        }
+
         context.getSource().sendFeedback(pages);
     }
 

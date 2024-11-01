@@ -26,6 +26,8 @@
   "castiautils.syncFailed": "Sync failed: %s",
   "castiautils.loadingAdditionalData": "Loading additional data...",
   "castiautils.reloadFailed": "Could not reload data: %s",
+  "castiautils.switchToSell": "[Switch to SELL]",
+  "castiautils.switchToBuy": "[Switch to BUY]",
 
   "text.autoconfig.castiautils.title": "Crafters Castia Utils Configuration",
   "text.autoconfig.castiautils.category.adblock": "Adblock",

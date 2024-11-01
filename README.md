@@ -27,10 +27,10 @@ If you want a token to play around, I might provide you one if you message me in
 Planned features:
 
 - delete offer from command list [DELETE]
+- shop delete command
 - hotkey for buy sell
 - PV Chesttracker integration
 - buy/sell REI integration
-- switch from buy to sell in the /shop <buy/sell> command
 - Web frontend to view itemprices and money gathering opportunities
 - Personal chat history (see what someone said in the past)
 - Personal money history (see your money history and other's as well)
