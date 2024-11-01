@@ -1,5 +1,6 @@
 package de.craftery.castiautils.chestshop;
 
+import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import de.craftery.castiautils.CastiaUtils;
@@ -117,6 +118,19 @@ public class ShopCommand {
                                     deleteOffer(context);
                                     return 1;
                                 })
+                                .then(argument("x", IntegerArgumentType.integer())
+                                        .then(argument("y", IntegerArgumentType.integer())
+                                                .then(argument("z", IntegerArgumentType.integer())
+                                                        .executes(context -> {
+                                                            int x = IntegerArgumentType.getInteger(context, "x");
+                                                            int y = IntegerArgumentType.getInteger(context, "y");
+                                                            int z = IntegerArgumentType.getInteger(context, "z");
+                                                            deleteOfferWithCoordinates(context, x, y, z);
+                                                            return 1;
+                                                        })
+                                                )
+                                        )
+                                )
                         )
                         .then(literal("push")
                                 .executes(context -> {
@@ -298,6 +312,13 @@ public class ShopCommand {
             MutableText tp = Text.literal("[TP]").setStyle(style).formatted(Formatting.GREEN);
             base.append(tp);
 
+            base.append(Text.literal(" "));
+
+            Style delStyle = Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/shop deleteoffer " + offer.getX() + " " + offer.getY() + " " + offer.getZ()));
+            delStyle = delStyle.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("castiautils.clickToDeleteOffer")));
+            MutableText del = Text.literal("[DELETE]").setStyle(delStyle).formatted(Formatting.RED);
+            base.append(del);
+
             context.getSource().sendFeedback(base);
         }
         int maxPage = (int) Math.ceil((double) offers.size() / 8);
@@ -343,28 +364,31 @@ public class ShopCommand {
             int x = blockHit.getBlockPos().getX();
             int y = blockHit.getBlockPos().getY();
             int z = blockHit.getBlockPos().getZ();
-
-            Offer shop = Offer.getByCoordinate(x,y,z);
-
-            if (shop == null) {
-                Messages.sendCommandFeedback(context, "noShopFound");
-                return;
-            }
-
-            shop.delete();
-
-            if (CastiaUtils.getConfig().contributeOffers) {
-                new Thread(() -> {
-                    try {
-                        RequestService.delete("offer", shop.getUniqueIdentifier());
-                    } catch (CastiaUtilsException e) {
-                        Messages.sendCommandFeedback(context, "deleteApiRequestFailed", e.getMessage());
-                    }
-                }).start();
-            }
-
-            Messages.sendCommandFeedback(context, "shopDeleted");
+            deleteOfferWithCoordinates(context, x, y ,z);
         }
+    }
+
+    private static void deleteOfferWithCoordinates(CommandContext<FabricClientCommandSource> context, int x, int y, int z) {
+        Offer shop = Offer.getByCoordinate(x,y,z);
+
+        if (shop == null) {
+            Messages.sendCommandFeedback(context, "noShopFound");
+            return;
+        }
+
+        shop.delete();
+
+        if (CastiaUtils.getConfig().contributeOffers) {
+            new Thread(() -> {
+                try {
+                    RequestService.delete("offer", shop.getUniqueIdentifier());
+                } catch (CastiaUtilsException e) {
+                    Messages.sendCommandFeedback(context, "deleteApiRequestFailed", e.getMessage());
+                }
+            }).start();
+        }
+
+        Messages.sendCommandFeedback(context, "shopDeleted");
     }
 
     public static void tp(String offerId) {

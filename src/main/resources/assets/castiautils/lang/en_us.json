@@ -28,6 +28,7 @@
   "castiautils.reloadFailed": "Could not reload data: %s",
   "castiautils.switchToSell": "[Switch to SELL]",
   "castiautils.switchToBuy": "[Switch to BUY]",
+  "castiautils.clickToDeleteOffer": "Click to delete this offer",
 
   "text.autoconfig.castiautils.title": "Crafters Castia Utils Configuration",
   "text.autoconfig.castiautils.category.adblock": "Adblock",

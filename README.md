@@ -26,7 +26,6 @@ If you want a token to play around, I might provide you one if you message me in
 
 Planned features:
 
-- delete offer from command list [DELETE]
 - hotkey for buy sell
 - PV Chesttracker integration
 - buy/sell REI integration
