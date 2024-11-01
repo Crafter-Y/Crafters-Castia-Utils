@@ -182,7 +182,7 @@ public class ShopCommand {
             } catch (NumberFormatException ignored) {}
         }
 
-        List<Offer> shops = Offer.getByItem(itemName).stream().filter(shop -> shop.getBuyPrice() != null).sorted((a, b) -> a.getBuyPrice() > b.getBuyPrice() ? 1 : -1).toList(); // TODO: Comparator.comparing()
+        List<Offer> shops = Offer.getByItem(itemName).stream().filter(shop -> shop.getBuyPrice() != null).sorted(Comparator.comparing(Offer::getBuyPrice)).toList();
 
         if (shops.isEmpty()) {
             Messages.sendCommandFeedback(context, "shopNotFound", itemName);
@@ -202,7 +202,7 @@ public class ShopCommand {
             } catch (NumberFormatException ignored) {}
         }
 
-        List<Offer> shops = Offer.getByItem(itemName).stream().filter(shop -> shop.getSellPrice() != 0).sorted((a, b) -> a.getSellPrice() < b.getSellPrice() ? 1 : -1).toList(); // TODO: Comparator.comparing()
+        List<Offer> shops = Offer.getByItem(itemName).stream().filter(shop -> shop.getSellPrice() != 0).sorted(Comparator.comparing((el) -> -el.getSellPrice())).toList();
 
         if (shops.isEmpty()) {
             Messages.sendCommandFeedback(context, "shopNotFound", itemName);
@@ -318,11 +318,13 @@ public class ShopCommand {
             shop.delete();
 
             if (CastiaUtils.getConfig().contributeOffers) {
-                try {
-                    RequestService.delete("offer", shop.getUniqueIdentifier());
-                } catch (CastiaUtilsException e) {
-                    Messages.sendCommandFeedback(context, "deleteApiRequestFailed", e.getMessage());
-                }
+                new Thread(() -> {
+                    try {
+                        RequestService.delete("offer", shop.getUniqueIdentifier());
+                    } catch (CastiaUtilsException e) {
+                        Messages.sendCommandFeedback(context, "deleteApiRequestFailed", e.getMessage());
+                    }
+                }).start();
             }
 
             Messages.sendCommandFeedback(context, "shopDeleted");
@@ -369,19 +371,21 @@ public class ShopCommand {
             Messages.sendCommandFeedback(context, "dontContribute");
             return;
         }
-        try {
-            RequestService.put("shop", Shop.getAll().toArray());
-            Messages.sendCommandFeedback(context, "successfulShopsContribution");
-        } catch (CastiaUtilsException e) {
-            Messages.sendCommandFeedback(context, "failedContribution", e.getMessage());
-        }
+        new Thread(() -> {
+            try {
+                RequestService.put("shop", Shop.getAll().toArray());
+                Messages.sendCommandFeedback(context, "successfulShopsContribution");
+            } catch (CastiaUtilsException e) {
+                Messages.sendCommandFeedback(context, "failedContribution", e.getMessage());
+            }
 
-        try {
-            RequestService.put("offer", Offer.getAll().toArray());
-            Messages.sendCommandFeedback(context, "successfulOfferContribution");
-        } catch (CastiaUtilsException e) {
-            Messages.sendCommandFeedback(context, "failedContribution", e.getMessage());
-        }
+            try {
+                RequestService.put("offer", Offer.getAll().toArray());
+                Messages.sendCommandFeedback(context, "successfulOfferContribution");
+            } catch (CastiaUtilsException e) {
+                Messages.sendCommandFeedback(context, "failedContribution", e.getMessage());
+            }
+        }).start();
     }
 
     public static void reloadShops(CommandContext<FabricClientCommandSource> context) {
@@ -414,24 +418,31 @@ public class ShopCommand {
             return;
         }
 
-        int deletedCount = 0;
-        for (Offer offer : List.copyOf(Offer.getAll())) {
+        List<Offer> offersToDelete = new ArrayList<>();
+        for (Offer offer : Offer.getAll()) {
             if (offer.getShop().equals(shop.getName())) {
-                offer.delete();
-                deletedCount++;
+                offersToDelete.add(offer);
+            }
+        }
 
-                if (CastiaUtils.getConfig().contributeOffers) {
+        // delete locally
+        for (Offer offer : offersToDelete) {
+            offer.delete();
+        }
+        if (CastiaUtils.getConfig().contributeOffers) {
+            new Thread(() -> {
+                for (Offer offer : offersToDelete) {
                     try {
                         RequestService.delete("offer", offer.getUniqueIdentifier());
                     } catch (CastiaUtilsException e) {
                         Messages.sendCommandFeedback(context, "deleteApiRequestFailed", e.getMessage());
                     }
                 }
-            }
+            }).start();
         }
 
-        if (deletedCount > 0) {
-            Messages.sendCommandFeedback(context, "offersDeleted", deletedCount + "");
+        if (!offersToDelete.isEmpty()) {
+            Messages.sendCommandFeedback(context, "offersDeleted", offersToDelete.size() + "");
         } else {
             Messages.sendCommandFeedback(context, "noOffersDeleted");
         }
