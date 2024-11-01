@@ -1,5 +1,6 @@
 package de.craftery.castiautils.chestshop;
 
+import com.google.gson.JsonObject;
 import lombok.Data;
 import lombok.Setter;
 import org.jetbrains.annotations.Nullable;
@@ -43,5 +44,15 @@ public class Shop {
 
     public static List<Shop> getAll() {
         return shops;
+    }
+
+    public void delete() {
+        shops.remove(this);
+    }
+
+    public JsonObject getUniqueIdentifier() {
+        JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty("name", this.name);
+        return jsonObject;
     }
 }

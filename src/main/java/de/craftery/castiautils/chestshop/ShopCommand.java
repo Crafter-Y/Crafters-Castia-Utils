@@ -58,6 +58,18 @@ public class ShopCommand {
                                         })
                                 )
                         )
+                        .then(literal("delete")
+                                .then(argument("name", StringArgumentType.word())
+                                        .executes(context -> {
+                                            String name = StringArgumentType.getString(context, "name");
+                                            deleteShop(context, name);
+                                            return 1;
+                                        }).suggests((context, builder) -> {
+                                            Shop.getAll().stream().map(Shop::getName).forEach(builder::suggest);
+                                            return builder.buildFuture();
+                                        })
+                                )
+                        )
                         .then(literal("buy")
                                 .then(argument("item", StringArgumentType.greedyString())
                                         .executes(context -> {
@@ -172,6 +184,34 @@ public class ShopCommand {
         Messages.sendCommandFeedback(context, "shopSelected", shop.getName(), shop.getCommand());
     }
 
+    public static void deleteShop(CommandContext<FabricClientCommandSource> context, String name) {
+        Shop shop = Shop.getByName(name);
+
+        if (shop == null) {
+            Messages.sendCommandFeedback(context, "shopNotExisting");
+            return;
+        }
+
+        shop.delete();
+
+        for (Offer offer : List.copyOf(Offer.getAll())) {
+            if (offer.getShop().equals(shop.getName())) {
+                offer.delete();
+            }
+        }
+
+        if (CastiaUtils.getConfig().contributeShops) {
+            new Thread(() -> {
+                try {
+                    RequestService.delete("shop", shop.getUniqueIdentifier());
+                } catch (CastiaUtilsException e) {
+                    Messages.sendCommandFeedback(context, "deleteApiRequestFailed", e.getMessage());
+                }
+            }).start();
+        }
+        Messages.sendCommandFeedback(context, "shopDeleted");
+    }
+
     public static void buyItem(CommandContext<FabricClientCommandSource> context, String itemName) {
         int page = 1;
         if (itemName.contains(" ")) {
@@ -226,10 +266,6 @@ public class ShopCommand {
             if (i < page*8 || i >= (page+1)*8) continue;
 
             Offer offer = offers.get(i);
-
-            Shop shop = Shop.getByName(offer.getShop());
-
-            assert shop != null;
 
             MutableText base = Text.empty();
 
