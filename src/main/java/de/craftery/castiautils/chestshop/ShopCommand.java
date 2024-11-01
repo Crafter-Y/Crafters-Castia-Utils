@@ -75,7 +75,9 @@ public class ShopCommand {
                                 .then(argument("item", StringArgumentType.greedyString())
                                         .executes(context -> {
                                             String itemName = StringArgumentType.getString(context, "item");
-                                            buyItem(context, itemName);
+                                            ClientPlayerEntity player = MinecraftClient.getInstance().player;
+                                            if (player == null) return 1;
+                                            buyItem(player, itemName);
                                             return 1;
                                         }).suggests((context, builder) -> {
                                             for (String item : Offer.getAll().stream().map(Offer::getItem).distinct().toList()) {
@@ -89,7 +91,9 @@ public class ShopCommand {
                                 .then(argument("item", StringArgumentType.greedyString())
                                         .executes(context -> {
                                             String itemName = StringArgumentType.getString(context, "item");
-                                            sellItem(context, itemName);
+                                            ClientPlayerEntity player = MinecraftClient.getInstance().player;
+                                            if (player == null) return 1;
+                                            sellItem(player, itemName);
                                             return 1;
                                         }).suggests((context, builder) -> {
                                             for (String item : Offer.getAll().stream().map(Offer::getItem).distinct().toList()) {
@@ -160,7 +164,7 @@ public class ShopCommand {
         );
     }
 
-    public static void createShop(CommandContext<FabricClientCommandSource> context, String name, String command) {
+    private static void createShop(CommandContext<FabricClientCommandSource> context, String name, String command) {
         Shop shop = Shop.getByName(name);
         if (shop != null) {
             Messages.sendCommandFeedback(context, "shopExisting");
@@ -185,7 +189,7 @@ public class ShopCommand {
         Messages.sendCommandFeedback(context, "shopCreated", name, command);
     }
 
-    public static void useShop(CommandContext<FabricClientCommandSource> context, String name) {
+    private static void useShop(CommandContext<FabricClientCommandSource> context, String name) {
         Shop shop = Shop.getByName(name);
 
         if (shop == null) {
@@ -198,7 +202,7 @@ public class ShopCommand {
         Messages.sendCommandFeedback(context, "shopSelected", shop.getName(), shop.getCommand());
     }
 
-    public static void deleteShop(CommandContext<FabricClientCommandSource> context, String name) {
+    private static void deleteShop(CommandContext<FabricClientCommandSource> context, String name) {
         Shop shop = Shop.getByName(name);
 
         if (shop == null) {
@@ -226,7 +230,7 @@ public class ShopCommand {
         Messages.sendCommandFeedback(context, "shopDeleted");
     }
 
-    public static void buyItem(CommandContext<FabricClientCommandSource> context, String itemName) {
+    public static void buyItem(ClientPlayerEntity player, String itemName) {
         int page = 1;
         if (itemName.contains(" ")) {
             String[] parts = itemName.split(" ");
@@ -239,14 +243,14 @@ public class ShopCommand {
         List<Offer> shops = Offer.getByItem(itemName).stream().filter(shop -> shop.getBuyPrice() != null).sorted(Comparator.comparing(Offer::getBuyPrice)).toList();
 
         if (shops.isEmpty()) {
-            Messages.sendCommandFeedback(context, "shopNotFound", itemName);
+            Messages.sendPlayerMessage(player, "shopNotFound", itemName);
             return;
         }
 
-        listTradePlaces(context, itemName, shops,true, page);
+        listTradePlaces(player, itemName, shops,true, page);
     }
 
-    public static void sellItem(CommandContext<FabricClientCommandSource> context, String itemName) {
+    public static void sellItem(ClientPlayerEntity player, String itemName) {
         int page = 1;
         if (itemName.contains(" ")) {
             String[] parts = itemName.split(" ");
@@ -259,21 +263,21 @@ public class ShopCommand {
         List<Offer> shops = Offer.getByItem(itemName).stream().filter(shop -> shop.getSellPrice() != 0).sorted(Comparator.comparing((el) -> -el.getSellPrice())).toList();
 
         if (shops.isEmpty()) {
-            Messages.sendCommandFeedback(context, "shopNotFound", itemName);
+            Messages.sendPlayerMessage(player, "shopNotFound", itemName);
             return;
         }
 
-        listTradePlaces(context, itemName, shops, false, page);
+        listTradePlaces(player, itemName, shops, false, page);
     }
 
-    private static void listTradePlaces(CommandContext<FabricClientCommandSource> context, String itemName, List<Offer> offers, boolean buy, int page) {
+    private static void listTradePlaces(ClientPlayerEntity player, String itemName, List<Offer> offers, boolean buy, int page) {
         page--; // because the first page is 1
 
-        context.getSource().sendFeedback(Text.empty());
+        player.sendMessage(Text.empty());
         if (buy) {
-            Messages.sendCommandFeedback(context, "buyHeader", itemName);
+            Messages.sendPlayerMessage(player, "buyHeader", itemName);
         } else {
-            Messages.sendCommandFeedback(context, "sellHeader", itemName);
+            Messages.sendPlayerMessage(player, "sellHeader", itemName);
         }
 
         for (int i = 0; i < offers.size(); i++) {
@@ -316,10 +320,10 @@ public class ShopCommand {
 
             Style delStyle = Style.EMPTY.withClickEvent(new ClickEvent(ClickEvent.Action.SUGGEST_COMMAND, "/shop deleteoffer " + offer.getX() + " " + offer.getY() + " " + offer.getZ()));
             delStyle = delStyle.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, Text.translatable("castiautils.clickToDeleteOffer")));
-            MutableText del = Text.literal("[DELETE]").setStyle(delStyle).formatted(Formatting.RED);
+            MutableText del = Text.literal("[DEL]").setStyle(delStyle).formatted(Formatting.RED);
             base.append(del);
 
-            context.getSource().sendFeedback(base);
+            player.sendMessage(base);
         }
         int maxPage = (int) Math.ceil((double) offers.size() / 8);
         MutableText pages = Text.empty();
@@ -350,10 +354,10 @@ public class ShopCommand {
             pages.append(text);
         }
 
-        context.getSource().sendFeedback(pages);
+        player.sendMessage(pages);
     }
 
-    public static void deleteOffer(CommandContext<FabricClientCommandSource> context) {
+    private static void deleteOffer(CommandContext<FabricClientCommandSource> context) {
         ClientPlayerEntity player = context.getSource().getPlayer();
 
         HitResult hit = player.raycast(20, 0, false);
@@ -391,7 +395,7 @@ public class ShopCommand {
         Messages.sendCommandFeedback(context, "shopDeleted");
     }
 
-    public static void tp(String offerId) {
+    private static void tp(String offerId) {
         Offer cs = Offer.getById(offerId);
         if (cs == null) return;
 
@@ -416,7 +420,7 @@ public class ShopCommand {
         CurrentGradientHolder.refreshColourScheme();
     }
 
-    public static void pushShops(CommandContext<FabricClientCommandSource> context) {
+    private static void pushShops(CommandContext<FabricClientCommandSource> context) {
         CastiaConfig config = CastiaUtils.getConfig();
 
         if (config.apiUrl.isEmpty()) {
@@ -448,7 +452,7 @@ public class ShopCommand {
         }).start();
     }
 
-    public static void reloadShops(CommandContext<FabricClientCommandSource> context) {
+    private static void reloadShops(CommandContext<FabricClientCommandSource> context) {
         CastiaConfig config = CastiaUtils.getConfig();
 
         new Thread(() -> {
@@ -471,7 +475,7 @@ public class ShopCommand {
         }).start();
     }
 
-    public static void resetShop(CommandContext<FabricClientCommandSource> context, String shopName) {
+    private static void resetShop(CommandContext<FabricClientCommandSource> context, String shopName) {
         Shop shop = Shop.getByName(shopName);
         if (shop == null) {
             Messages.sendCommandFeedback(context, "shopNotFound", shopName);

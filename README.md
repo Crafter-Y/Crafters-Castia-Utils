@@ -26,7 +26,6 @@ If you want a token to play around, I might provide you one if you message me in
 
 Planned features:
 
-- hotkey for buy sell
 - PV Chesttracker integration
 - buy/sell REI integration
 - Web frontend to view itemprices and money gathering opportunities

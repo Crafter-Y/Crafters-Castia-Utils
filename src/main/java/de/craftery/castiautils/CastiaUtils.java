@@ -4,10 +4,7 @@ import de.craftery.castiautils.adblock.Adblocker;
 import de.craftery.castiautils.ah.AhLogger;
 import de.craftery.castiautils.api.AdditionalDataTooltip;
 import de.craftery.castiautils.api.RefetchService;
-import de.craftery.castiautils.chestshop.ItemShopTooltip;
-import de.craftery.castiautils.chestshop.ShopCommand;
-import de.craftery.castiautils.chestshop.ShopConfig;
-import de.craftery.castiautils.chestshop.ShopLogger;
+import de.craftery.castiautils.chestshop.*;
 import de.craftery.castiautils.config.CastiaConfig;
 import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.serializer.JanksonConfigSerializer;
@@ -33,6 +30,7 @@ public class CastiaUtils implements ModInitializer {
         AdditionalDataTooltip.register();
         ShopLogger.register();
         ShopCommand.register();
+        ShopKeybinds.register();
         RefetchService.register();
     }
 
