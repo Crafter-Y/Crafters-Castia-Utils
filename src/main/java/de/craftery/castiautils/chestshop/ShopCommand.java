@@ -8,9 +8,11 @@ import de.craftery.castiautils.CastiaUtilsException;
 import de.craftery.castiautils.Messages;
 import de.craftery.castiautils.api.AdditionalDataTooltip;
 import de.craftery.castiautils.api.RequestService;
+import de.craftery.castiautils.compat.WhereIsItIntegration;
 import de.craftery.castiautils.config.CastiaConfig;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
+import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -18,10 +20,6 @@ import net.minecraft.text.*;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
-import net.minecraft.util.math.BlockPos;
-import red.jackf.whereisit.api.SearchResult;
-import red.jackf.whereisit.client.render.CurrentGradientHolder;
-import red.jackf.whereisit.client.render.Rendering;
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
@@ -411,15 +409,9 @@ public class ShopCommand {
 
         handler.sendCommand(shop.getCommand().replace("/", ""));
 
-        // unfortunately this is very hacky. but it works :)
-        // integration with Where Is it?
-        Rendering.resetSearchTime();
-        SearchResult search = SearchResult.builder(new BlockPos(cs.getX(), cs.getY(), cs.getZ())).build();
-        Collection<SearchResult> list = new ArrayDeque<>();
-        list.add(search);
-        Rendering.addResults(list);
-
-        CurrentGradientHolder.refreshColourScheme();
+        if (FabricLoader.getInstance().isModLoaded("whereisit")) {
+            WhereIsItIntegration.highlightBlock(cs.getX(), cs.getY(), cs.getZ());
+        }
     }
 
     private static void pushShops(CommandContext<FabricClientCommandSource> context) {
