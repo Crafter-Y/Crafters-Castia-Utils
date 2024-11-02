@@ -291,7 +291,7 @@ public class ShopLogger {
 
         final Offer offerToSend = SerializationUtils.clone(offer);
         new Thread(() -> {
-            if (CastiaUtils.getConfig().contributeOffers) {
+            if (CastiaUtils.getConfig().apiEnabled) {
                 try {
                     RequestService.post("offer", offerToSend.getUniqueIdentifier(), offerToSend);
                     player.sendMessage(Text.literal(selectedShop + " " + itemId + " (" + buyPrice + ", " + sellPrice + ") (synced)"), true);
@@ -364,7 +364,7 @@ public class ShopLogger {
 
     private static void triggerApiUpdate(Offer offer) {
         new Thread(() -> {
-            if (CastiaUtils.getConfig().contributeOffers) {
+            if (CastiaUtils.getConfig().apiEnabled) {
                 try {
                     RequestService.post("offer", offer.getUniqueIdentifier(), offer);
                 } catch (CastiaUtilsException e) {

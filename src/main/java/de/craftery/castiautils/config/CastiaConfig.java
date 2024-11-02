@@ -84,31 +84,19 @@ public class CastiaConfig implements ConfigData {
 
     // API Options --------------------------------------------------------------------->>>>
     @ConfigEntry.Category("api")
+    public boolean apiEnabled = false;
+
+    @ConfigEntry.Category("api")
     @ConfigEntry.Gui.Tooltip
     public String apiUrl = "https://castiaapi.crafter-y.de/";
 
     @ConfigEntry.Category("api")
     @ConfigEntry.Gui.Tooltip
-    public String token = "";
+    public String token = "public";
 
     @ConfigEntry.Category("api")
     @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
-    public DataSource dataSource = DataSource.LOCAL_ONLY;
-
-    @ConfigEntry.Category("api")
-    @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
-    public RefetchPeriod periodicallyRefetchData = RefetchPeriod.OFF;
-
-    @ConfigEntry.Category("api")
-    @ConfigEntry.Gui.Tooltip
-    public boolean contributeShops = false;
-
-    @ConfigEntry.Category("api")
-    @ConfigEntry.Gui.Tooltip
-    public boolean contributeOffers = false;
-
-    @ConfigEntry.Category("api")
-    public boolean contributeAuctions = false;
+    public RefetchPeriod periodicallyRefetchData = RefetchPeriod.EVERY_10_MINUTES;
 
     @ConfigEntry.Category("api")
     @ConfigEntry.Gui.Tooltip

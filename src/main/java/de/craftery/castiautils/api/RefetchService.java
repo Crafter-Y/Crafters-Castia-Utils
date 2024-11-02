@@ -5,7 +5,6 @@ import de.craftery.castiautils.CastiaUtilsException;
 import de.craftery.castiautils.Messages;
 import de.craftery.castiautils.chestshop.ShopConfig;
 import de.craftery.castiautils.config.CastiaConfig;
-import de.craftery.castiautils.config.DataSource;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayerEntity;
@@ -32,12 +31,11 @@ public class RefetchService {
                         CastiaUtils.LOGGER.info("reloaded data");
 
                         if (player != null && config.devMode) {
-                            if (config.dataSource == DataSource.LOCAL_ONLY) {
-                                Messages.sendPlayerMessage(player, "reloadedLocal");
-                            } else if (config.dataSource == DataSource.SERVER_ONLY) {
+                            if (config.apiEnabled) {
                                 Messages.sendPlayerMessage(player, "reloadedServer");
+
                             } else {
-                                Messages.sendPlayerMessage(player, "reloadedMerge");
+                                Messages.sendPlayerMessage(player, "reloadedLocal");
                             }
                         }
                     } catch (CastiaUtilsException e) {

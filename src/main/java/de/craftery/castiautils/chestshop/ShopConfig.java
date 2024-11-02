@@ -7,7 +7,6 @@ import de.craftery.castiautils.CastiaUtils;
 import de.craftery.castiautils.CastiaUtilsException;
 import de.craftery.castiautils.api.RequestService;
 import de.craftery.castiautils.config.CastiaConfig;
-import de.craftery.castiautils.config.DataSource;
 import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.Jankson;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -29,7 +28,7 @@ public class ShopConfig {
         CastiaConfig config = CastiaUtils.getConfig();
         Gson gson = new Gson();
 
-        if (config.dataSource == DataSource.LOCAL_ONLY || config.dataSource == DataSource.MERGE) {
+        if (!config.apiEnabled) {
             CastiaUtils.LOGGER.info("Loading data from local config");
             try {
                 String json = FileUtils.readFileToString(getConfigFile("offers.json5"), "UTF-8");
@@ -52,19 +51,14 @@ public class ShopConfig {
             } catch (JsonSyntaxException | IOException e) {
                 throw new CastiaUtilsException("Could not load shops.json5: " + e.getMessage());
             }
+            return;
         }
-        if (config.dataSource == DataSource.LOCAL_ONLY) return;
 
         try {
             JsonElement shopData = RequestService.get("shop");
             List<Shop> shops = new ArrayList<>(Arrays.stream(gson.fromJson(shopData, Shop[].class)).toList());
-            if (config.dataSource == DataSource.SERVER_ONLY) {
-                CastiaUtils.LOGGER.info("Loading data from API");
-                Shop.setShops(shops);
-            } else {
-                CastiaUtils.LOGGER.info("Merging data from API");
-                Shop.mergeIncoming(shops);
-            }
+            Shop.setShops(shops);
+            CastiaUtils.LOGGER.info("Loaded shops from API");
         } catch (CastiaUtilsException e) {
             throw new CastiaUtilsException("Failed to load shops from API: " + e.getMessage());
         }
@@ -72,13 +66,8 @@ public class ShopConfig {
         try {
             JsonElement offerData = RequestService.get("offer");
             List<Offer> offers = new ArrayList<>(Arrays.stream(gson.fromJson(offerData, Offer[].class)).toList());
-            if (config.dataSource == DataSource.SERVER_ONLY) {
-                CastiaUtils.LOGGER.info("Loading data from API");
-                Offer.setOffers(offers);
-            } else {
-                CastiaUtils.LOGGER.info("Merging data from API");
-                Offer.mergeIncoming(offers);
-            }
+            Offer.setOffers(offers);
+            CastiaUtils.LOGGER.info("Loaded offers from API");
         } catch (CastiaUtilsException e) {
             throw new CastiaUtilsException("Failed to load offers from API: " + e.getMessage());
         }
@@ -101,7 +90,7 @@ public class ShopConfig {
     public static void writeState() {
         CastiaConfig config = CastiaUtils.getConfig();
 
-        if (config.dataSource == DataSource.LOCAL_ONLY || config.dataSource == DataSource.MERGE) {
+        if (!config.apiEnabled) {
             CastiaUtils.LOGGER.info("Saving data to local storage");
 
             Jankson jankson = Jankson.builder().build();

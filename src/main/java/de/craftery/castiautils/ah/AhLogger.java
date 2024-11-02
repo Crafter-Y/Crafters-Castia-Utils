@@ -26,7 +26,7 @@ public class AhLogger {
 
     public static void register() {
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            if (!CastiaUtils.getConfig().contributeAuctions) return;
+            if (!CastiaUtils.getConfig().apiEnabled) return;
 
             if (commitPendingIn > 0) {
                 commitPendingIn--;
@@ -83,7 +83,7 @@ public class AhLogger {
     }
 
     public static void onContainerOpen(int syncId) {
-        if (!CastiaUtils.getConfig().contributeAuctions) return;
+        if (!CastiaUtils.getConfig().apiEnabled) return;
 
         if ((MinecraftClient.getInstance().currentScreen instanceof GenericContainerScreen containerScreen)) {
             if (containerScreen.getTitle().getString().equals("Auctions")) {
@@ -93,7 +93,7 @@ public class AhLogger {
     }
 
     public static void onSlotData(int syncId, ItemStack data) {
-        if (!CastiaUtils.getConfig().contributeAuctions) return;
+        if (!CastiaUtils.getConfig().apiEnabled) return;
 
         if (syncId != currentSyncId) return;
         AhOffer offer = parseOffer(data);
@@ -101,7 +101,7 @@ public class AhLogger {
     }
 
     public static void onInventoryData(int syncId, List<ItemStack> data) {
-        if (!CastiaUtils.getConfig().contributeAuctions) return;
+        if (!CastiaUtils.getConfig().apiEnabled) return;
 
         if (syncId != currentSyncId) return;
 

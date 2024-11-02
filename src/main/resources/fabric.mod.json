@@ -34,10 +34,11 @@
     "fabric": "*",
     "minecraft": "${minecraft_version}",
     "whereisit": "*",
-    "modmenu": ">=11.0.2"
+    "cloth-config": "*",
+    "modmenu": "*"
   },
   "suggests": {
-    "roughlyenoughitems": ">=16.0.783",
+    "roughlyenoughitems": "*",
     "jade": "*",
     "chesttracker": "*"
   }

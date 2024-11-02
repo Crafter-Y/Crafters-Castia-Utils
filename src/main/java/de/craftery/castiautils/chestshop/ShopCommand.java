@@ -9,7 +9,6 @@ import de.craftery.castiautils.Messages;
 import de.craftery.castiautils.api.AdditionalDataTooltip;
 import de.craftery.castiautils.api.RequestService;
 import de.craftery.castiautils.config.CastiaConfig;
-import de.craftery.castiautils.config.DataSource;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.MinecraftClient;
@@ -177,7 +176,7 @@ public class ShopCommand {
 
         ShopLogger.setSelectedShop(name);
 
-        if (CastiaUtils.getConfig().contributeShops) {
+        if (CastiaUtils.getConfig().apiEnabled) {
             try {
                 RequestService.put("shop", shop);
                 Messages.sendCommandFeedback(context, "successfulContribution");
@@ -218,7 +217,7 @@ public class ShopCommand {
             }
         }
 
-        if (CastiaUtils.getConfig().contributeShops) {
+        if (CastiaUtils.getConfig().apiEnabled) {
             new Thread(() -> {
                 try {
                     RequestService.delete("shop", shop.getUniqueIdentifier());
@@ -382,7 +381,7 @@ public class ShopCommand {
 
         shop.delete();
 
-        if (CastiaUtils.getConfig().contributeOffers) {
+        if (CastiaUtils.getConfig().apiEnabled) {
             new Thread(() -> {
                 try {
                     RequestService.delete("offer", shop.getUniqueIdentifier());
@@ -431,7 +430,7 @@ public class ShopCommand {
             Messages.sendCommandFeedback(context, "noToken");
             return;
         }
-        if (!config.contributeShops || !config.contributeOffers) {
+        if (!config.apiEnabled) {
             Messages.sendCommandFeedback(context, "dontContribute");
             return;
         }
@@ -460,12 +459,11 @@ public class ShopCommand {
             try {
                 ShopConfig.load();
 
-                if (config.dataSource == DataSource.LOCAL_ONLY) {
-                    Messages.sendCommandFeedback(context, "reloadedLocal");
-                } else if (config.dataSource == DataSource.SERVER_ONLY) {
+                if (config.apiEnabled) {
                     Messages.sendCommandFeedback(context, "reloadedServer");
+
                 } else {
-                    Messages.sendCommandFeedback(context, "reloadedMerge");
+                    Messages.sendCommandFeedback(context, "reloadedLocal");
                 }
             } catch (CastiaUtilsException e) {
                 Messages.sendCommandFeedback(context, "reloadFailed", e.getMessage());
@@ -493,7 +491,7 @@ public class ShopCommand {
         for (Offer offer : offersToDelete) {
             offer.delete();
         }
-        if (CastiaUtils.getConfig().contributeOffers) {
+        if (CastiaUtils.getConfig().apiEnabled) {
             new Thread(() -> {
                 for (Offer offer : offersToDelete) {
                     try {
