@@ -16,16 +16,10 @@ public class Shop {
     @Setter
     private static List<Shop> shops = new ArrayList<>();
 
-    public Shop() {
+    public Shop(String name, String command) {
+        this.name = name;
+        this.command = command;
         shops.add(this);
-    }
-
-    public static void mergeIncoming(List<Shop> newShops) {
-        for (Shop shop : newShops) {
-            if (shops.stream().noneMatch(s -> s.getName().equals(shop.getName()))) {
-                shops.add(shop);
-            }
-        }
     }
 
     public static @Nullable Shop getByName(String name) {

@@ -33,13 +33,13 @@
     "fabricloader": ">=${loader_version}",
     "fabric": "*",
     "minecraft": "${minecraft_version}",
-    "whereisit": "*",
     "cloth-config": "*",
     "modmenu": "*"
   },
   "suggests": {
     "roughlyenoughitems": "*",
     "jade": "*",
+    "whereisit": "*",
     "chesttracker": "*"
   }
 }

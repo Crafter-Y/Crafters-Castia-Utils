@@ -170,22 +170,25 @@ public class ShopCommand {
             return;
         }
 
-        shop = new Shop();
-        shop.setCommand(command);
-        shop.setName(name);
-
-        ShopLogger.setSelectedShop(name);
-
         if (CastiaUtils.getConfig().apiEnabled) {
-            try {
-                RequestService.put("shop", shop);
-                Messages.sendCommandFeedback(context, "successfulContribution");
-            } catch (CastiaUtilsException e) {
-                Messages.sendCommandFeedback(context, "failedContribution", e.getMessage());
-            }
+            shop = new Shop(name, command);
+            Shop finalShop = shop;
+            new Thread(() -> {
+                try {
+                    RequestService.put("shop", new Shop[]{finalShop});
+                    Messages.sendCommandFeedback(context, "successfulContribution");
+                    ShopLogger.setSelectedShop(name);
+                    Messages.sendCommandFeedback(context, "shopCreated", name, command);
+                } catch (CastiaUtilsException e) {
+                    Messages.sendCommandFeedback(context, "failedContribution", e.getMessage());
+                    finalShop.delete();
+                }
+            }).start();
+        } else {
+            new Shop(name, command);
+            ShopLogger.setSelectedShop(name);
+            Messages.sendCommandFeedback(context, "shopCreated", name, command);
         }
-
-        Messages.sendCommandFeedback(context, "shopCreated", name, command);
     }
 
     private static void useShop(CommandContext<FabricClientCommandSource> context, String name) {

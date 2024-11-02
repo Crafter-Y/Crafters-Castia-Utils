@@ -12,9 +12,11 @@ For now, there will be no download available, as this is in a very early stage. 
 
 ## API access
 
-This mod can utilise data from my [api](https://github.com/Crafter-Y/castia-utils-api), but a token is needed for now. Maybe I will open this API up to the public or something like that, but for now it is like it is.
+This mod utilises data from my [api](https://github.com/Crafter-Y/castia-utils-api). But certain features are not enabled for the public token.
 
-If you want a token to play around, I might provide you one if you message me ingame or on Discord (@crafter_y)
+Feel free to host it yourself or ask me for a token ingame or on Discord (@crafter_y).
+
+The public api key is: "public" and should already be set as the default value.
 
 ## Features
 
@@ -32,10 +34,6 @@ Planned features:
 - Personal chat history (see what someone said in the past)
 - Personal money history (see your money history and other's as well)
 - fallen town logs
-
-## Modpacks
-
-Please do not include this in any modpack. Sure, try it out, but it is too buggy to be widely used.
 
 ## License
 

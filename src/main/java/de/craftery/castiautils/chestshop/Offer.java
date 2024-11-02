@@ -31,16 +31,6 @@ public class Offer implements Serializable {
         offers.add(this);
     }
 
-    public static void mergeIncoming(List<Offer> newOffers) {
-        for (Offer offer : newOffers) {
-            if (offers.stream().noneMatch(s -> s.getId().equals(offer.getId()))) {
-                if (Shop.getByName(offer.getShop()) != null) {
-                    offers.add(offer);
-                }
-            }
-        }
-    }
-
     public static List<Offer> getByItem(String item) {
         List<Offer> returnOffers = new ArrayList<>();
         for (Offer offer : offers) {

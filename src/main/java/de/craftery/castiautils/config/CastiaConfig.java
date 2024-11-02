@@ -84,7 +84,7 @@ public class CastiaConfig implements ConfigData {
 
     // API Options --------------------------------------------------------------------->>>>
     @ConfigEntry.Category("api")
-    public boolean apiEnabled = false;
+    public boolean apiEnabled = true;
 
     @ConfigEntry.Category("api")
     @ConfigEntry.Gui.Tooltip

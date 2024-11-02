@@ -12,6 +12,7 @@ import me.shedaniel.cloth.clothconfig.shadowed.blue.endless.jankson.Jankson;
 import com.google.gson.JsonElement;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.methods.*;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.BasicResponseHandler;
@@ -55,6 +56,13 @@ public class RequestService {
     private static @Nullable JsonElement perform(HttpEntityEnclosingRequestBase request, boolean expectResponse, JsonObject uniqueIdentifier, Object data) throws CastiaUtilsException {
         CastiaConfig config = CastiaUtils.getConfig();
         if (config.apiUrl.isEmpty() || config.token.isEmpty()) throw new CastiaUtilsException("API token or URL empty");
+
+        RequestConfig requestConfig = RequestConfig.custom()
+                .setSocketTimeout(5000)
+                .setConnectTimeout(5000)
+                .setConnectionRequestTimeout(5000)
+                .build();
+        request.setConfig(requestConfig);
 
         Gson gson = new Gson();
 
