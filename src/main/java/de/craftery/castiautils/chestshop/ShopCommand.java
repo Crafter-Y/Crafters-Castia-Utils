@@ -210,24 +210,33 @@ public class ShopCommand {
             return;
         }
 
-        shop.delete();
-
-        for (Offer offer : List.copyOf(Offer.getAll())) {
-            if (offer.getShop().equals(shop.getName())) {
-                offer.delete();
-            }
-        }
-
         if (CastiaUtils.getConfig().apiEnabled) {
             new Thread(() -> {
                 try {
                     RequestService.delete("shop", shop.getUniqueIdentifier());
+
+                    shop.delete();
+
+                    for (Offer offer : List.copyOf(Offer.getAll())) {
+                        if (offer.getShop().equals(shop.getName())) {
+                            offer.delete();
+                        }
+                    }
+                    Messages.sendCommandFeedback(context, "shopDeleted");
                 } catch (CastiaUtilsException e) {
                     Messages.sendCommandFeedback(context, "deleteApiRequestFailed", e.getMessage());
                 }
             }).start();
+        } else {
+            shop.delete();
+
+            for (Offer offer : List.copyOf(Offer.getAll())) {
+                if (offer.getShop().equals(shop.getName())) {
+                    offer.delete();
+                }
+            }
+            Messages.sendCommandFeedback(context, "shopDeleted");
         }
-        Messages.sendCommandFeedback(context, "shopDeleted");
     }
 
     public static void buyItem(ClientPlayerEntity player, String itemName) {
@@ -380,19 +389,20 @@ public class ShopCommand {
             return;
         }
 
-        shop.delete();
-
         if (CastiaUtils.getConfig().apiEnabled) {
             new Thread(() -> {
                 try {
                     RequestService.delete("offer", shop.getUniqueIdentifier());
+                    shop.delete();
+                    Messages.sendCommandFeedback(context, "shopDeleted");
                 } catch (CastiaUtilsException e) {
                     Messages.sendCommandFeedback(context, "deleteApiRequestFailed", e.getMessage());
                 }
             }).start();
+        } else {
+            shop.delete();
+            Messages.sendCommandFeedback(context, "shopDeleted");
         }
-
-        Messages.sendCommandFeedback(context, "shopDeleted");
     }
 
     private static void tp(String offerId) {

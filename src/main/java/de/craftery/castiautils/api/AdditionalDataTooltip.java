@@ -9,6 +9,8 @@ import de.craftery.castiautils.chestshop.ShopLogger;
 import lombok.Data;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
+import net.minecraft.component.Component;
+import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.text.MutableText;
@@ -30,6 +32,13 @@ public class AdditionalDataTooltip {
             if (ItemShopTooltip.shouldHideTooltopBecauseOfContainer()) return;
 
             if (type == TooltipType.BASIC || type == TooltipType.ADVANCED) {
+                String itemId = ShopLogger.getItemId(stack);
+                if (itemId.equals("minecraft:paper")) {
+                    for (Component<?> component : stack.getComponents()) {
+                        if (component.type() == DataComponentTypes.CUSTOM_MODEL_DATA) return; // dont show pagination papers
+                    }
+                }
+
                 lines.addAll(getAdvancedTooltip(stack));
             }
         });

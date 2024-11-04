@@ -33,7 +33,7 @@ public class Offer implements Serializable {
 
     public static List<Offer> getByItem(String item) {
         List<Offer> returnOffers = new ArrayList<>();
-        for (Offer offer : offers) {
+        for (Offer offer : List.copyOf(offers)) {
             if (offer.item == null) {
                 CastiaUtils.LOGGER.error(offer.getId() + " " + offer.getOwner() + " is null!");
                 continue;

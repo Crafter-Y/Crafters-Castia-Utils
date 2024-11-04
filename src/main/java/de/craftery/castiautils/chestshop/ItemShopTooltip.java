@@ -5,6 +5,11 @@ import lombok.Setter;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
+import net.minecraft.component.Component;
+import net.minecraft.component.ComponentType;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.component.type.CustomModelDataComponent;
+import net.minecraft.item.Items;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -40,6 +45,13 @@ public class ItemShopTooltip {
 
             if (type == TooltipType.BASIC || type == TooltipType.ADVANCED) {
                 String itemId = ShopLogger.getItemId(stack);
+
+                if (itemId.equals("minecraft:paper")) {
+                    for (Component<?> component : stack.getComponents()) {
+                        if (component.type() == DataComponentTypes.CUSTOM_MODEL_DATA) return; // dont show pagination papers
+                    }
+                }
+
                 List<Offer> offers = Offer.getByItem(itemId);
 
                 if (offers.isEmpty()) return;

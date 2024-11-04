@@ -23,13 +23,13 @@ public class Shop {
     }
 
     public static @Nullable Shop getByName(String name) {
-        return shops.stream().filter(shop -> shop.getName().equals(name)).findFirst().orElse(null);
+        return shops.stream().filter(shop -> shop.getName().equalsIgnoreCase(name)).findFirst().orElse(null);
     }
 
     public static List<Shop> getByCommand(String command) {
         List<Shop> offers = new ArrayList<>();
         for (Shop shop : shops) {
-            if (shop.command.equals(command)) {
+            if (shop.command.equalsIgnoreCase(command)) {
                 offers.add(shop);
             }
         }
