@@ -69,6 +69,8 @@
   "text.autoconfig.castiautils.option.chestshopDataCollection": "Enable data collection",
   "text.autoconfig.castiautils.option.enableTooltipInfo": "Enable tooltip info",
   "text.autoconfig.castiautils.option.enableTooltipInfo.@Tooltip": "This option embeds stack/buy/sell prices into every item tooltip.",
+  "text.autoconfig.castiautils.option.enableChestValue": "Enable chest value display.",
+  "text.autoconfig.castiautils.option.enableChestValue.@Tooltip": "Embeds the assumed value of the entire chest ontop of the chest",
 
   "text.autoconfig.castiautils.category.api": "API",
   "text.autoconfig.castiautils.option.apiEnabled": "Enable API features",

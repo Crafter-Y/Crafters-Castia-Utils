@@ -1,6 +1,7 @@
 package de.craftery.castiautils.mixin;
 
 import de.craftery.castiautils.ah.AhLogger;
+import de.craftery.castiautils.chestshop.ContainerValueProvider;
 import de.craftery.castiautils.chestshop.ShopLogger;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.s2c.play.InventoryS2CPacket;
@@ -24,6 +25,7 @@ public class InventoryS2CPacketMixin {
 
     @Inject(at = @At("HEAD"), method = "getContents")
     public void getContents(CallbackInfoReturnable<List<ItemStack>> cir) {
+        ContainerValueProvider.onInventoryData(contents);
         ShopLogger.onInventoryData(syncId, contents);
         AhLogger.onInventoryData(syncId, contents);
     }

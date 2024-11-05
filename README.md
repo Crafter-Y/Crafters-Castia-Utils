@@ -25,6 +25,7 @@ The public api key is: "public" and should already be set as the default value.
 - Useful Tooltip Data (displays the stack/buy/sell price of every item in its item tag) (some parts require API)
 - Auction house price tracking (requires API)
 - [Chest Tracker](https://modrinth.com/mod/chest-tracker) Integration
+- Container price tags
 
 Planned features:
 

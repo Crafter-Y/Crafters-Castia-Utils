@@ -6,6 +6,7 @@
   "mixins": [
     "HandledScreensMixin",
     "InventoryS2CPacketMixin",
+    "ScreenHandlerMixin",
     "ScreenHandlerSlotUpdateS2CPacketMixin"
   ],
   "injectors": {

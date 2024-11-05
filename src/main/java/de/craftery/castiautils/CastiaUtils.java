@@ -31,6 +31,7 @@ public class CastiaUtils implements ModInitializer {
         ShopLogger.register();
         ShopCommand.register();
         ShopKeybinds.register();
+        ContainerValueProvider.register();
         RefetchService.register();
     }
 

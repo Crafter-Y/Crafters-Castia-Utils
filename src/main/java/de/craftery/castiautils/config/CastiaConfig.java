@@ -82,6 +82,10 @@ public class CastiaConfig implements ConfigData {
     @ConfigEntry.Gui.Tooltip
     public boolean enableTooltipInfo = true;
 
+    @ConfigEntry.Category("chestshop")
+    @ConfigEntry.Gui.Tooltip
+    public boolean enableChestValue = true;
+
     // API Options --------------------------------------------------------------------->>>>
     @ConfigEntry.Category("api")
     public boolean apiEnabled = true;
