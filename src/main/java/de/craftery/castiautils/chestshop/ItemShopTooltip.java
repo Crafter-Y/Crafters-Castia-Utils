@@ -5,11 +5,11 @@ import lombok.Setter;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
+import net.minecraft.client.gui.screen.ingame.ShulkerBoxScreen;
 import net.minecraft.component.Component;
-import net.minecraft.component.ComponentType;
 import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.CustomModelDataComponent;
-import net.minecraft.item.Items;
+import net.minecraft.component.type.ContainerComponent;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -41,25 +41,24 @@ public class ItemShopTooltip {
     public static void register() {
         ItemTooltipCallback.EVENT.register((stack, context, type, lines) -> {
             if (!CastiaUtils.getConfig().enableTooltipInfo) return;
-
             if (shouldHideTooltopBecauseOfContainer()) return;
+            if (type != TooltipType.BASIC && type != TooltipType.ADVANCED) return;
 
-            if (type == TooltipType.BASIC || type == TooltipType.ADVANCED) {
-                String itemId = ShopLogger.getItemId(stack);
 
-                if (itemId.equals("minecraft:paper")) {
-                    for (Component<?> component : stack.getComponents()) {
-                        if (component.type() == DataComponentTypes.CUSTOM_MODEL_DATA) return; // dont show pagination papers
-                    }
+            String itemId = ShopLogger.getItemId(stack);
+
+            if (itemId.equals("minecraft:paper")) {
+                for (Component<?> component : stack.getComponents()) {
+                    if (component.type() == DataComponentTypes.CUSTOM_MODEL_DATA) return; // dont show pagination papers
                 }
+            }
 
-                List<Offer> offers = Offer.getByItem(itemId);
+            DecimalFormat df = new DecimalFormat("#,###.#", new DecimalFormatSymbols(Locale.ENGLISH));
+            df.setRoundingMode(RoundingMode.CEILING);
 
-                if (offers.isEmpty()) return;
+            List<Offer> offers = Offer.getByItem(itemId);
 
-                DecimalFormat df = new DecimalFormat("#,###.#", new DecimalFormatSymbols(Locale.ENGLISH));
-                df.setRoundingMode(RoundingMode.CEILING);
-
+            if (!offers.isEmpty()) {
                 offers.sort(Comparator.comparing(Offer::getSellPrice));
                 List<Offer> sellOffers = offers.stream().filter(offer -> !offer.isFull()).toList().reversed();
                 if (!sellOffers.isEmpty()) {
@@ -74,7 +73,7 @@ public class ItemShopTooltip {
                         MutableText sellAll = Text.empty();
 
                         sellAll.append(Text.literal("Sell (" + stack.getCount() + ") for ").formatted(Formatting.GRAY));
-                        sellAll.append(Text.literal("$" + df.format(bestSellOffer.getSellPrice()*stack.getCount())).formatted(Formatting.GOLD));
+                        sellAll.append(Text.literal("$" + df.format(bestSellOffer.getSellPrice() * stack.getCount())).formatted(Formatting.GOLD));
                         sellAll.append(Text.literal(" at ").formatted(Formatting.GRAY));
 
                         sellAll.append(Text.literal(sellShop.getCommand()).formatted(Formatting.AQUA));
@@ -89,23 +88,44 @@ public class ItemShopTooltip {
 
                 offers.sort(Comparator.comparing(Offer::getBuyPrice));
                 List<Offer> buyOffers = offers.stream().filter(offer -> !offer.isEmpty()).toList();
-                if (buyOffers.isEmpty()) return;
-                Offer bestBuyOffer = buyOffers.getFirst();
-                Shop buyShop = Shop.getByName(bestBuyOffer.getShop());
 
-                if (buyShop == null) {
-                    CastiaUtils.LOGGER.error("Buyshop should not be null here! (shop does not exist for offer?)");
-                    return;
+                if (!buyOffers.isEmpty()) {
+                    Offer bestBuyOffer = buyOffers.getFirst();
+                    Shop buyShop = Shop.getByName(bestBuyOffer.getShop());
+
+                    if (buyShop == null) {
+                        CastiaUtils.LOGGER.error("Buyshop should not be null here! (shop does not exist for offer?)");
+                        return;
+                    }
+
+                    MutableText buyAll = Text.empty();
+
+                    buyAll.append(Text.literal("Buy (1) for ").formatted(Formatting.GRAY));
+                    buyAll.append(Text.literal("$" + df.format(bestBuyOffer.getBuyPrice())).formatted(Formatting.GOLD));
+                    buyAll.append(Text.literal(" at ").formatted(Formatting.GRAY));
+
+                    buyAll.append(Text.literal(buyShop.getCommand()).formatted(Formatting.AQUA));
+                    lines.add(buyAll);
                 }
+            }
 
-                MutableText buyAll = Text.empty();
+            if (itemId.contains("shulker_box")) {
+                for (Component<?> component : stack.getComponents()) {
+                    if (component.type() == DataComponentTypes.CONTAINER && component.value() instanceof ContainerComponent containerComponent) {
+                        List<ItemStack> contents = containerComponent.stream().toList();
+                        float containerValue = 0;
 
-                buyAll.append(Text.literal("Buy (1) for ").formatted(Formatting.GRAY));
-                buyAll.append(Text.literal("$" + df.format(bestBuyOffer.getBuyPrice())).formatted(Formatting.GOLD));
-                buyAll.append(Text.literal(" at ").formatted(Formatting.GRAY));
-
-                buyAll.append(Text.literal(buyShop.getCommand()).formatted(Formatting.AQUA));
-                lines.add(buyAll);
+                        for (ItemStack containerItem : contents) {
+                            containerValue += ContainerValueProvider.getStackSellValue(containerItem);
+                        }
+                        if (containerValue != 0) {
+                            MutableText containerText = Text.empty();
+                            containerText.append(Text.literal("Sell contents: ").formatted(Formatting.GRAY));
+                            containerText.append(Text.literal("$" + df.format(containerValue)).formatted(Formatting.GOLD));
+                            lines.add(containerText);
+                        }
+                    }
+                }
             }
         });
     }

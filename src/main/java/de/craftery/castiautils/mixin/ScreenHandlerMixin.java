@@ -3,6 +3,7 @@ package de.craftery.castiautils.mixin;
 import de.craftery.castiautils.chestshop.ContainerValueProvider;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
+import net.minecraft.client.gui.screen.ingame.ShulkerBoxScreen;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.SimpleInventory;
 import net.minecraft.screen.ScreenHandler;
@@ -20,6 +21,11 @@ public class ScreenHandlerMixin {
     private void onSlotClick(int slotIndex, int button, SlotActionType actionType, PlayerEntity player, CallbackInfo ci) {
         if (MinecraftClient.getInstance().currentScreen instanceof GenericContainerScreen genericContainerScreen) {
             if (genericContainerScreen.getScreenHandler().getInventory() instanceof SimpleInventory inv) {
+                ContainerValueProvider.onInventoryData(inv.getHeldStacks());
+            }
+        }
+        if (MinecraftClient.getInstance().currentScreen instanceof ShulkerBoxScreen shulkerBoxScreen) {
+            if (shulkerBoxScreen.getScreenHandler().inventory instanceof SimpleInventory inv) {
                 ContainerValueProvider.onInventoryData(inv.getHeldStacks());
             }
         }

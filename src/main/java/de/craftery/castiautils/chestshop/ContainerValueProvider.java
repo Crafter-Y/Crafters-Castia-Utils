@@ -6,6 +6,8 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
+import net.minecraft.client.gui.screen.ingame.HandledScreen;
+import net.minecraft.client.gui.screen.ingame.ShulkerBoxScreen;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -25,16 +27,21 @@ public class ContainerValueProvider {
         ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
             if (!CastiaUtils.getConfig().enableChestValue) return;
 
-            if (client.currentScreen instanceof GenericContainerScreen genericContainerScreen) {
+            if (client.currentScreen instanceof HandledScreen<?> handledScreen) {
                 ScreenEvents.beforeRender(screen).register((Screen innerScreen, DrawContext drawContext, int mouseX, int mouseY, float deltaTick) -> {
-                    render(client, genericContainerScreen, drawContext);
+                    render(client, handledScreen, drawContext);
                 });
             }
         });
     }
 
-    private static void render(MinecraftClient client, GenericContainerScreen screen, DrawContext drawContext) {
+    private static void render(MinecraftClient client, HandledScreen<?> screen, DrawContext drawContext) {
         if (ItemShopTooltip.shouldHideTooltopBecauseOfContainer()) return;
+        if (screen.getTitle().getString().equals("Auctions")) return;
+        if (
+                !(screen instanceof GenericContainerScreen) &&
+                !(screen instanceof ShulkerBoxScreen)
+        ) return;
 
         int textX = screen.x;
         int textY = screen.y - 10;
@@ -53,16 +60,24 @@ public class ContainerValueProvider {
 
         if (MinecraftClient.getInstance().currentScreen instanceof GenericContainerScreen genericContainerScreen) {
             for (int i = 0; i < genericContainerScreen.getScreenHandler().getRows()*9; i++) {
-                ItemStack item = data.get(i);
-                String itemId = ShopLogger.getItemId(item);
-                List<Offer> offers = Offer.getByItem(itemId);
-                if (offers.isEmpty()) continue;
-                offers.sort(Comparator.comparing(Offer::getSellPrice));
-                List<Offer> sellOffers = offers.stream().filter(offer -> !offer.isFull()).toList().reversed();
-                if (sellOffers.isEmpty()) continue;
-                Offer bestSellOffer = sellOffers.getFirst();
-                openedContainerValue += (bestSellOffer.getSellPrice() * item.getCount());
+                openedContainerValue += getStackSellValue(data.get(i));
             }
         }
+        if (MinecraftClient.getInstance().currentScreen instanceof ShulkerBoxScreen) {
+            for (int i = 0; i < 27; i++) {
+                openedContainerValue += getStackSellValue(data.get(i));
+            }
+        }
+    }
+
+    public static float getStackSellValue(ItemStack stack) {
+        String itemId = ShopLogger.getItemId(stack);
+        List<Offer> offers = Offer.getByItem(itemId);
+        if (offers.isEmpty()) return 0;
+        offers.sort(Comparator.comparing(Offer::getSellPrice));
+        List<Offer> sellOffers = offers.stream().filter(offer -> !offer.isFull()).toList().reversed();
+        if (sellOffers.isEmpty()) return 0;
+        Offer bestSellOffer = sellOffers.getFirst();
+        return bestSellOffer.getSellPrice() * stack.getCount();
     }
 }
