@@ -127,3 +127,30 @@ jar {
         rename { "${it}_${project.archivesBaseName}" }
     }
 }
+
+def getGitCommitHash = {
+    def stdout = new ByteArrayOutputStream()
+    exec {
+        commandLine 'git', 'rev-parse', '--short', 'HEAD'
+        standardOutput = stdout
+    }
+    return stdout.toString().trim()
+}
+def gitCommitHash = getGitCommitHash()
+
+tasks.register('nightlyJar') {
+    group = 'build'
+    description = 'Creates a build with the JAR named with the current Git commit hash.'
+
+    dependsOn tasks.remapJar
+
+    doLast {
+        def originalJar = tasks.remapJar.archiveFile.get().asFile
+        def targetJar = new File(originalJar.parent, "${project.archives_base_name}-${project.mod_version}-${gitCommitHash}.jar")
+        copy {
+            from originalJar
+            into targetJar.parentFile
+            rename { targetJar.name }
+        }
+    }
+}

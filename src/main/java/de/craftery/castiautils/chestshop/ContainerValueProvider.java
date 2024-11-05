@@ -42,6 +42,7 @@ public class ContainerValueProvider {
                 !(screen instanceof GenericContainerScreen) &&
                 !(screen instanceof ShulkerBoxScreen)
         ) return;
+        if (screen.getTitle().getString().length() == 2 && screen.getTitle().getString().charAt(0) == 57344 && screen.getTitle().getString().charAt(1) == 57856) return; // hide anyway in chestshops
 
         int textX = screen.x;
         int textY = screen.y - 10;
