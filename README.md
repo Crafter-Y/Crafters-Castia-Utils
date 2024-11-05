@@ -28,7 +28,6 @@ The public api key is: "public" and should already be set as the default value.
 
 Planned features:
 
-- PV Chesttracker integration
 - buy/sell REI integration
 - Web frontend to view itemprices and money gathering opportunities
 - Personal chat history (see what someone said in the past)

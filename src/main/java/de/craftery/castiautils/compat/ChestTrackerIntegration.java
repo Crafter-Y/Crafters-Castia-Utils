@@ -18,14 +18,17 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class ChestTrackerIntegration implements ChestTrackerPlugin {
     private static final Identifier TOWN_VAULT = Identifier.of("castiautils", "town_vault");
+    private static final Identifier PRIVATE_VAULT = Identifier.of("castiautils", "private_vault");
 
     private static final Set<String> townVaultCommands = Set.of("town vault", "town v", "t vault", "t v");
 
     AtomicInteger townVault = new AtomicInteger(0);
+    AtomicInteger privateVault = new AtomicInteger(0);
 
     @Override
     public void load() {
         DefaultIcons.registerIconBelow(CommonKeys.ENDER_CHEST_KEY, new MemoryKeyIcon(TOWN_VAULT, Items.TRAPPED_CHEST.getDefaultStack()));
+        DefaultIcons.registerIconBelow(TOWN_VAULT, new MemoryKeyIcon(PRIVATE_VAULT, Items.BARREL.getDefaultStack()));
 
         DefaultProviderScreenClose.EVENT.register((provider, context) -> {
             String title = context.getScreen().getTitle().getString();
@@ -40,6 +43,12 @@ public class ChestTrackerIntegration implements ChestTrackerPlugin {
                 }
                 return ResultHolder.value(MemoryBuilder.create(context.getItems()).toResult(TOWN_VAULT, new BlockPos(townVault.get(), 0, 0)));
             }
+            if (title.startsWith("Vault #")) {
+                if (townVault.get() == 0) {
+                    return ResultHolder.empty();
+                }
+                return ResultHolder.value(MemoryBuilder.create(context.getItems()).toResult(PRIVATE_VAULT, new BlockPos(privateVault.get(), 0, 0)));
+            }
 
             return ResultHolder.pass();
         });
@@ -51,6 +60,13 @@ public class ChestTrackerIntegration implements ChestTrackerPlugin {
                     townVault.set(Integer.parseInt(parts[2]));
                 } else {
                     townVault.set(0);
+                }
+            } else if (command.startsWith("pv")) {
+                String[] parts = command.split(" ");
+                if (parts.length == 2) {
+                    privateVault.set(Integer.parseInt(parts[1]));
+                } else {
+                    privateVault.set(0);
                 }
             }
         });
