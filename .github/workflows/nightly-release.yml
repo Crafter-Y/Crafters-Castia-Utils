@@ -46,6 +46,7 @@ jobs:
           # Find the file in build/libs that matches the commit hash
           JAR_FILE=$(find ./build/libs -name "*-${{ env.COMMIT_HASH }}.jar" -print -quit)
           echo "JAR_FILE=$JAR_FILE" >> $GITHUB_ENV
+          echo "JAR_FILENAME=$(basename $JAR_FILE)" >> $GITHUB_ENV
 
       - name: Create GitHub release
         id: create_release
@@ -65,5 +66,5 @@ jobs:
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
           asset_path: ${{ env.JAR_FILE }}
-          asset_name: $(basename ${{ env.JAR_FILE }})
+          asset_name: ${{ env.JAR_FILENAME }}
           asset_content_type: application/java-archive
