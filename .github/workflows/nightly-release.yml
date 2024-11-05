@@ -36,16 +36,16 @@ jobs:
       - name: Build JAR with nightlyJar task
         run: ./gradlew nightlyJar
 
+      - name: Get short commit hash
+        id: commit_hash
+        run: echo "COMMIT_HASH=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
       - name: Find the generated JAR file
         id: find_jar
         run: |
           # Find the file in build/libs that matches the commit hash
           JAR_FILE=$(find ./build/libs -name "*-${{ env.COMMIT_HASH }}.jar" -print -quit)
           echo "JAR_FILE=$JAR_FILE" >> $GITHUB_ENV
-
-      - name: Get short commit hash
-        id: commit_hash
-        run: echo "COMMIT_HASH=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
 
       - name: Create GitHub release
         id: create_release
