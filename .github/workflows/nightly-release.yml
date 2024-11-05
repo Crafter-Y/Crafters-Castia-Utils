@@ -36,6 +36,17 @@ jobs:
       - name: Build JAR with nightlyJar task
         run: ./gradlew nightlyJar
 
+      - name: Find the generated JAR file
+        id: find_jar
+        run: |
+          # Find the file in build/libs that matches the commit hash
+          JAR_FILE=$(find ./build/libs -name "*-${{ env.COMMIT_HASH }}.jar" -print -quit)
+          echo "JAR_FILE=$JAR_FILE" >> $GITHUB_ENV
+
+      - name: Get short commit hash
+        id: commit_hash
+        run: echo "COMMIT_HASH=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
       - name: Create GitHub release
         id: create_release
         uses: actions/create-release@v1
@@ -51,6 +62,6 @@ jobs:
         uses: actions/upload-release-asset@v1
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./build/libs/*.jar
-          asset_name: castiautils-nightly-${{ github.sha }}.jar
+          asset_path: ./build/libs/*-${{ env.COMMIT_HASH }}.jar
+          asset_name: castiautils-${{ env.COMMIT_HASH }}.jar
           asset_content_type: application/java-archive
