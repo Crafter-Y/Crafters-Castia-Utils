@@ -67,10 +67,19 @@
 
   "text.autoconfig.castiautils.category.chestshop": "Chestshop",
   "text.autoconfig.castiautils.option.chestshopDataCollection": "Enable data collection",
+  "text.autoconfig.castiautils.option.enableContainerValue": "Enable container value display.",
+  "text.autoconfig.castiautils.option.enableContainerValue.@Tooltip": "Embeds the assumed value of the entire container ontop of the gui",
+  "text.autoconfig.castiautils.option.fallbackToBuyOnContainerValue": "Fallback to buy prices for container value estimation",
+
+  "text.autoconfig.castiautils.category.tooltips": "Item Tooltips",
   "text.autoconfig.castiautils.option.enableTooltipInfo": "Enable tooltip info",
   "text.autoconfig.castiautils.option.enableTooltipInfo.@Tooltip": "This option embeds stack/buy/sell prices into every item tooltip.",
-  "text.autoconfig.castiautils.option.enableChestValue": "Enable chest value display.",
-  "text.autoconfig.castiautils.option.enableChestValue.@Tooltip": "Embeds the assumed value of the entire chest ontop of the chest",
+  "text.autoconfig.castiautils.option.queryAdditionalTooltip": "Query additional tooltip",
+  "text.autoconfig.castiautils.option.queryAdditionalTooltip.@Tooltip": "Embed action and offer min/l25/avg/med/h25/max into every item tooltip.",
+
+  "text.autoconfig.castiautils.category.relic": "Relic Prices",
+  "text.autoconfig.castiautils.option.enableEstimateRelicPrices": "Enable relic price estimation",
+  "text.autoconfig.castiautils.option.fallbackToRelicOnContainerValue": "Fallback to estimated relic prices for container value estimation",
 
   "text.autoconfig.castiautils.category.api": "API",
   "text.autoconfig.castiautils.option.apiEnabled": "Enable API features",
@@ -79,8 +88,6 @@
   "text.autoconfig.castiautils.option.token": "API Token",
   "text.autoconfig.castiautils.option.token.@Tooltip": "This is needed to use the API. DM me ingame or on DC @crafter_y",
   "text.autoconfig.castiautils.option.periodicallyRefetchData": "Periodically refetch data from API",
-  "text.autoconfig.castiautils.option.queryAdditionalTooltip": "Query additional tooltip",
-  "text.autoconfig.castiautils.option.queryAdditionalTooltip.@Tooltip": "Embed action and offer min/l25/avg/med/h25/max into every item tooltip.",
 
   "text.autoconfig.castiautils.category.dev": "Dev Options",
   "text.autoconfig.castiautils.option.devMode": "Developer Mode"

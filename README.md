@@ -26,6 +26,7 @@ The public api key is: "public" and should already be set as the default value.
 - Auction house price tracking (requires API)
 - [Chest Tracker](https://modrinth.com/mod/chest-tracker) Integration
 - Container price tags
+- Estimate relic prices
 
 Planned features:
 

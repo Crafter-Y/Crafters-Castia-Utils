@@ -80,11 +80,28 @@ public class CastiaConfig implements ConfigData {
 
     @ConfigEntry.Category("chestshop")
     @ConfigEntry.Gui.Tooltip
-    public boolean enableTooltipInfo = true;
+    public boolean enableContainerValue = true;
 
     @ConfigEntry.Category("chestshop")
+    public boolean fallbackToBuyOnContainerValue = true;
+
+    // Tooltips --------------------------------------------------------------------->>>>
+
+    @ConfigEntry.Category("tooltips")
     @ConfigEntry.Gui.Tooltip
-    public boolean enableChestValue = true;
+    public boolean enableTooltipInfo = true;
+
+    @ConfigEntry.Category("tooltips")
+    @ConfigEntry.Gui.Tooltip
+    public boolean queryAdditionalTooltip = true;
+
+
+    // Relic Price estimation --------------------------------------------------------------------->>>>
+    @ConfigEntry.Category("relic")
+    public boolean enableEstimateRelicPrices = true;
+
+    @ConfigEntry.Category("relic")
+    public boolean fallbackToRelicOnContainerValue = true;
 
     // API Options --------------------------------------------------------------------->>>>
     @ConfigEntry.Category("api")
@@ -101,10 +118,6 @@ public class CastiaConfig implements ConfigData {
     @ConfigEntry.Category("api")
     @ConfigEntry.Gui.EnumHandler(option = ConfigEntry.Gui.EnumHandler.EnumDisplayOption.BUTTON)
     public RefetchPeriod periodicallyRefetchData = RefetchPeriod.EVERY_10_MINUTES;
-
-    @ConfigEntry.Category("api")
-    @ConfigEntry.Gui.Tooltip
-    public boolean queryAdditionalTooltip = false;
 
     // Developer Options --------------------------------------------------------------------->>>>
     @ConfigEntry.Category("dev")

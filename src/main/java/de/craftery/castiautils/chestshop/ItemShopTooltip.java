@@ -1,11 +1,11 @@
 package de.craftery.castiautils.chestshop;
 
 import de.craftery.castiautils.CastiaUtils;
+import de.craftery.castiautils.chestshop.relic.RelicPriceEstimation;
 import lombok.Setter;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
-import net.minecraft.client.gui.screen.ingame.ShulkerBoxScreen;
 import net.minecraft.component.Component;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.ContainerComponent;
@@ -116,7 +116,7 @@ public class ItemShopTooltip {
                         float containerValue = 0;
 
                         for (ItemStack containerItem : contents) {
-                            containerValue += ContainerValueProvider.getStackSellValue(containerItem);
+                            containerValue += ContainerValueProvider.getStackValue(containerItem);
                         }
                         if (containerValue != 0) {
                             MutableText containerText = Text.empty();
@@ -126,6 +126,10 @@ public class ItemShopTooltip {
                         }
                     }
                 }
+            }
+
+            if (CastiaUtils.getConfig().enableEstimateRelicPrices) {
+                RelicPriceEstimation.estimateItemValue(stack, lines);
             }
         });
     }

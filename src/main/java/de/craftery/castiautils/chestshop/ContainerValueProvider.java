@@ -25,7 +25,7 @@ public class ContainerValueProvider {
 
     public static void register() {
         ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
-            if (!CastiaUtils.getConfig().enableChestValue) return;
+            if (!CastiaUtils.getConfig().enableContainerValue) return;
 
             if (client.currentScreen instanceof HandledScreen<?> handledScreen) {
                 ScreenEvents.beforeRender(screen).register((Screen innerScreen, DrawContext drawContext, int mouseX, int mouseY, float deltaTick) -> {
@@ -55,30 +55,39 @@ public class ContainerValueProvider {
     }
 
     public static void onInventoryData(List<ItemStack> data) {
-        if (!CastiaUtils.getConfig().enableChestValue) return;
+        if (!CastiaUtils.getConfig().enableContainerValue) return;
 
         openedContainerValue = 0;
 
         if (MinecraftClient.getInstance().currentScreen instanceof GenericContainerScreen genericContainerScreen) {
             for (int i = 0; i < genericContainerScreen.getScreenHandler().getRows()*9; i++) {
-                openedContainerValue += getStackSellValue(data.get(i));
+                openedContainerValue += getStackValue(data.get(i));
             }
         }
         if (MinecraftClient.getInstance().currentScreen instanceof ShulkerBoxScreen) {
             for (int i = 0; i < 27; i++) {
-                openedContainerValue += getStackSellValue(data.get(i));
+                openedContainerValue += getStackValue(data.get(i));
             }
         }
     }
 
-    public static float getStackSellValue(ItemStack stack) {
+    public static float getStackValue(ItemStack stack) {
         String itemId = ShopLogger.getItemId(stack);
         List<Offer> offers = Offer.getByItem(itemId);
         if (offers.isEmpty()) return 0;
         offers.sort(Comparator.comparing(Offer::getSellPrice));
         List<Offer> sellOffers = offers.stream().filter(offer -> !offer.isFull()).toList().reversed();
-        if (sellOffers.isEmpty()) return 0;
-        Offer bestSellOffer = sellOffers.getFirst();
-        return bestSellOffer.getSellPrice() * stack.getCount();
+        if (!sellOffers.isEmpty() && sellOffers.getFirst().getSellPrice() != 0) {
+            Offer bestSellOffer = sellOffers.getFirst();
+            return bestSellOffer.getSellPrice() * stack.getCount();
+        } else if(CastiaUtils.getConfig().fallbackToBuyOnContainerValue) {
+            offers.sort(Comparator.comparing(Offer::getBuyPrice));
+            List<Offer> buyOffers = offers.stream().filter(offer -> !offer.isEmpty()).toList();
+            if (!buyOffers.isEmpty()) {
+                Offer bestBuyOffer = buyOffers.getFirst();
+                return bestBuyOffer.getBuyPrice() * stack.getCount();
+            }
+        }
+        return 0;
     }
 }
