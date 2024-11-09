@@ -148,6 +148,12 @@ public class RelicPriceEstimation {
             return (float) Math.min((500*Math.pow(4, (level.doubleValue()-1))), 6000);
         }
         if (enchantment.equals("sweeping_edge")) {
+            if (relicType == RelicType.MITHRIL) {
+                if (level == 1) return 15000;
+                if (level == 2) return 35000;
+                if (level == 3) return 100000;
+                return (float) (100000*Math.pow(2, (level.doubleValue()-3)));
+            }
             return (float) (400*Math.pow(1.5, (level.doubleValue()-1)));
         }
         if (enchantment.equals("smite")) {
