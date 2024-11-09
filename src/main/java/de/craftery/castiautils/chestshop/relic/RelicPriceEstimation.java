@@ -94,7 +94,12 @@ public class RelicPriceEstimation {
         }
         if (enchantment.equals("protection")) {
             if (level < 6) return level*1000;
-            return (float) (10000*Math.pow(2, (level.doubleValue()-6)));
+            if (level == 6) return 15000;
+            if (level == 7) return 25000;
+            if (level == 8) return 35000;
+            if (level == 9) return 70000;
+            if (level == 10) return 300000;
+            return (float) (300000*Math.pow(1.5, (level.doubleValue()-10)));
         } else if (enchantment.contains("protection")) {
             return (float) (800*Math.pow(1.2, (level.doubleValue()-1)));
         }
@@ -151,8 +156,8 @@ public class RelicPriceEstimation {
             if (relicType == RelicType.MITHRIL) {
                 if (level == 1) return 15000;
                 if (level == 2) return 35000;
-                if (level == 3) return 100000;
-                return (float) (100000*Math.pow(2, (level.doubleValue()-3)));
+                if (level == 3) return 55000;
+                return (float) (55000*Math.pow(2, (level.doubleValue()-3)));
             }
             return (float) (400*Math.pow(1.5, (level.doubleValue()-1)));
         }
