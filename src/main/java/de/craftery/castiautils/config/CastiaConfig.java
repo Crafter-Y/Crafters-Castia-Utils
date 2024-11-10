@@ -85,6 +85,12 @@ public class CastiaConfig implements ConfigData {
     @ConfigEntry.Category("chestshop")
     public boolean fallbackToBuyOnContainerValue = true;
 
+    @ConfigEntry.Category("chestshop")
+    public boolean hideEmptyInShopBuyCommand = false;
+
+    @ConfigEntry.Category("chestshop")
+    public boolean hideFullInShopSellCommand = false;
+
     // Tooltips --------------------------------------------------------------------->>>>
 
     @ConfigEntry.Category("tooltips")

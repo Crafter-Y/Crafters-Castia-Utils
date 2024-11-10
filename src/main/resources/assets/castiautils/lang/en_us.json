@@ -28,6 +28,8 @@
   "castiautils.switchToSell": "[Switch to SELL]",
   "castiautils.switchToBuy": "[Switch to BUY]",
   "castiautils.clickToDeleteOffer": "Click to delete this offer",
+  "castiautils.noNonEmptyShop": "No non-empty shops for %s found",
+  "castiautils.noNonFullShop": "No non-full shops for %s found",
 
   "castiautils.keybinds.sell": "Show sell info",
   "castiautils.keybinds.buy": "Show buy info",
@@ -70,6 +72,8 @@
   "text.autoconfig.castiautils.option.enableContainerValue": "Enable container value display.",
   "text.autoconfig.castiautils.option.enableContainerValue.@Tooltip": "Embeds the assumed value of the entire container ontop of the gui",
   "text.autoconfig.castiautils.option.fallbackToBuyOnContainerValue": "Fallback to buy prices for container value estimation",
+  "text.autoconfig.castiautils.option.hideEmptyInShopBuyCommand": "Hide empty shops in /shop buy command",
+  "text.autoconfig.castiautils.option.hideFullInShopSellCommand": "Hide full shops in /shop sell command",
 
   "text.autoconfig.castiautils.category.tooltips": "Item Tooltips",
   "text.autoconfig.castiautils.option.enableTooltipInfo": "Enable tooltip info",

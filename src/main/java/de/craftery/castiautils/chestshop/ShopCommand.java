@@ -256,6 +256,14 @@ public class ShopCommand {
             return;
         }
 
+        if (CastiaUtils.getConfig().hideEmptyInShopBuyCommand) {
+            shops = shops.stream().filter(shop -> !shop.isEmpty()).toList();
+            if (shops.isEmpty()) {
+                Messages.sendPlayerMessage(player, "noNonEmptyShop", itemName);
+                return;
+            }
+        }
+
         listTradePlaces(player, itemName, shops,true, page);
     }
 
@@ -274,6 +282,14 @@ public class ShopCommand {
         if (shops.isEmpty()) {
             Messages.sendPlayerMessage(player, "shopNotFound", itemName);
             return;
+        }
+
+        if (CastiaUtils.getConfig().hideFullInShopSellCommand) {
+            shops = shops.stream().filter(shop -> !shop.isFull()).toList();
+            if (shops.isEmpty()) {
+                Messages.sendPlayerMessage(player, "noNonFullShop", itemName);
+                return;
+            }
         }
 
         listTradePlaces(player, itemName, shops, false, page);
