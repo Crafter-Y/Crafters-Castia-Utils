@@ -109,6 +109,10 @@ public class CastiaConfig implements ConfigData {
     @ConfigEntry.Category("relic")
     public boolean fallbackToRelicOnContainerValue = true;
 
+    @ConfigEntry.Category("relic")
+    @ConfigEntry.Gui.Tooltip
+    public boolean playSoundOnMithrilFind = false;
+
     // API Options --------------------------------------------------------------------->>>>
     @ConfigEntry.Category("api")
     public boolean apiEnabled = true;

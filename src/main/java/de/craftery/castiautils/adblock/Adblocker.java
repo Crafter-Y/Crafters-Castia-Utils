@@ -3,10 +3,14 @@ package de.craftery.castiautils.adblock;
 import de.craftery.castiautils.CastiaUtils;
 import de.craftery.castiautils.chestshop.ShopLogger;
 import de.craftery.castiautils.config.CastiaConfig;
-import me.shedaniel.autoconfig.AutoConfig;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayerEntity;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.Text;
+import net.minecraft.util.math.Vec3d;
 
 public class Adblocker {
     public static void register() {
@@ -64,6 +68,10 @@ public class Adblocker {
             } else if (handleStoreAdvertisementMessages(message)) {
                 return config.storeAdvertisements;
             } else if (handleFoundItemMessage(message)) {
+                if (config.playSoundOnMithrilFind) {
+                    playMithrilFoundSound();
+                }
+
                 return config.playerFoundMessage;
             } else if (handleGemstoneMessage(message)) {
                 return config.gemstoneFoundMessage;
@@ -75,6 +83,24 @@ public class Adblocker {
 
             return true;
         });
+    }
+
+    private static void playMithrilFoundSound() {
+        MinecraftClient client = MinecraftClient.getInstance();
+        if (client == null) return;
+        ClientPlayerEntity player = client.player;
+        if (player == null) return;
+        if (client.world == null) return;
+
+        Vec3d pos = player.getPos();
+        client.world.playSound(
+                client.player,
+                pos.x, pos.y, pos.z,
+                SoundEvents.GOAT_HORN_SOUNDS.getFirst(),
+                SoundCategory.PLAYERS,
+                3f,
+                1.0f
+        );
     }
 
     private static boolean handleShopEmptyMessage(Text message) {

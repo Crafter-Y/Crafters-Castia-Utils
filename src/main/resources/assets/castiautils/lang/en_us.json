@@ -81,9 +81,11 @@
   "text.autoconfig.castiautils.option.queryAdditionalTooltip": "Query additional tooltip",
   "text.autoconfig.castiautils.option.queryAdditionalTooltip.@Tooltip": "Embed action and offer min/l25/avg/med/h25/max into every item tooltip.",
 
-  "text.autoconfig.castiautils.category.relic": "Relic Prices",
+  "text.autoconfig.castiautils.category.relic": "Relics",
   "text.autoconfig.castiautils.option.enableEstimateRelicPrices": "Enable relic price estimation",
   "text.autoconfig.castiautils.option.fallbackToRelicOnContainerValue": "Fallback to estimated relic prices for container value estimation",
+  "text.autoconfig.castiautils.option.playSoundOnMithrilFind": "Play sound on mithril found",
+  "text.autoconfig.castiautils.option.playSoundOnMithrilFind.@Tooltip": "This will play the sound anytime someone finds a mithril.",
 
   "text.autoconfig.castiautils.category.api": "API",
   "text.autoconfig.castiautils.option.apiEnabled": "Enable API features",
