@@ -31,16 +31,20 @@ public class AhLogger {
             if (commitPendingIn > 0) {
                 commitPendingIn--;
                 if (commitPendingIn == 0) {
-                    try {
-                        RequestService.put("auction", pendingOffers.toArray());
-                    } catch (CastiaUtilsException e) {
-                        CastiaUtils.LOGGER.error("Auction contribution failed: " + e.getMessage());
-                    }
-
-                    for (AhOffer offer : pendingOffers) {
-                        AdditionalDataTooltip.invalidateCache(offer.getItem());
-                    }
+                    List<AhOffer> offers = List.copyOf(pendingOffers);
                     pendingOffers.clear();
+                    new Thread(() -> {
+                        try {
+                            RequestService.put("auction", offers.toArray());
+                        } catch (CastiaUtilsException e) {
+                            CastiaUtils.LOGGER.error("Auction contribution failed: " + e.getMessage());
+                        }
+
+                        for (AhOffer offer : pendingOffers) {
+                            AdditionalDataTooltip.invalidateCache(offer.getItem());
+                        }
+
+                    }).start();
                 }
             }
         });
@@ -86,7 +90,8 @@ public class AhLogger {
         if (!CastiaUtils.getConfig().apiEnabled) return;
 
         if ((MinecraftClient.getInstance().currentScreen instanceof GenericContainerScreen containerScreen)) {
-            if (containerScreen.getTitle().getString().equals("Auctions")) {
+            String title = containerScreen.getTitle().getString();
+            if (title.length() == 2 && title.charAt(0) == 57344 && title.charAt(1) == 57961) {
                 currentSyncId = syncId;
             }
         }

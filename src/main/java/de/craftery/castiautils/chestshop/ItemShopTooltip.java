@@ -29,7 +29,7 @@ public class ItemShopTooltip {
     public static boolean shouldHideTooltopBecauseOfContainer() {
         if (MinecraftClient.getInstance().currentScreen instanceof GenericContainerScreen) {
             return !currentInventoryTitle.isEmpty() &&
-                    !currentInventoryTitle.equals("Auctions") && // don't hide in auctions
+                    (currentInventoryTitle.length() != 2 || currentInventoryTitle.charAt(0) != 57344 || currentInventoryTitle.charAt(1) != 57961) && // don't hide in auctions
                     !currentInventoryTitle.equals("Town Vault") && // don't hide in town vault
                     !currentInventoryTitle.startsWith("Vault #") && // don't hide in private vault
                     (currentInventoryTitle.length() != 2 || currentInventoryTitle.charAt(0) != 57344 || currentInventoryTitle.charAt(1) != 57856); // dont hide in chestshops

@@ -8,7 +8,14 @@ This mod is in early development and UNFINISHED. Bugs/crashes are expected.
 
 ## Download
 
-For now, there will be no download available, as this is in a very early stage. At some point I will upload a file on GitHub. I don't think I will put this on Curseforge/Modrinth.
+Only download the mod from here. Don't accept jars send to you via discord or from another website.
+
+| Download         | Link                                                                                    |
+|------------------|-----------------------------------------------------------------------------------------|
+| Release          | Not available yet                                                                       |
+| Latest dev build | [Download (expand Assets)](https://github.com/Crafter-Y/Crafters-Castia-Utils/releases) |
+
+I don't think I will put this on Curseforge / Modrinth.
 
 ## API access
 
