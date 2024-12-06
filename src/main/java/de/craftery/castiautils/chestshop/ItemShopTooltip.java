@@ -26,7 +26,7 @@ public class ItemShopTooltip {
         if (MinecraftClient.getInstance().currentScreen instanceof GenericContainerScreen) {
             ContainerType type = ContainerType.getCurrentScreenType();
 
-            return !(type == ContainerType.AUCTION_HOUSE || type == ContainerType.TOWN_VAULT || type == ContainerType.PRIVATE_VAULT || type == ContainerType.CHESTSHOP);
+            return type == ContainerType.OTHER;
         }
         return false;
     }

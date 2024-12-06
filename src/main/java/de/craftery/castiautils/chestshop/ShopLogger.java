@@ -324,7 +324,7 @@ public class ShopLogger {
         actionBarReport.append(Text.literal(" ("));
 
         if (buyPrice > 1_000_000_000) {
-            actionBarReport.append(Text.literal("not buying").formatted(Formatting.GOLD));
+            actionBarReport.append(Text.literal("not buyable").formatted(Formatting.GOLD));
         } else {
             actionBarReport.append(Text.literal(buyPrice + "").formatted(Formatting.GOLD));
         }
@@ -332,7 +332,7 @@ public class ShopLogger {
         actionBarReport.append(Text.literal(", "));
 
         if (sellPrice == 0) {
-            actionBarReport.append(Text.literal("not selling").formatted(Formatting.GOLD));
+            actionBarReport.append(Text.literal("not sellable").formatted(Formatting.GOLD));
         } else {
             actionBarReport.append(Text.literal(sellPrice + "").formatted(Formatting.GOLD));
         }
