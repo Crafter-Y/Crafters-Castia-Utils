@@ -55,21 +55,43 @@ public class AdditionalDataTooltip {
                     }
 
                     new Thread(() -> {
-                        try {
-                            JsonElement tooltipResponse = RequestService.get("tooltip", items.toArray());
-                            Gson gson = new Gson();
-                            List<CachedAdditionalTooltip> tooltipData = new ArrayList<>(Arrays.stream(gson.fromJson(tooltipResponse, CachedAdditionalTooltip[].class)).toList());
-                            for (CachedAdditionalTooltip tooltip : tooltipData) {
-                                tooltip.setLoaded(true);
-                                cachedTooltips.put(tooltip.getItem(), tooltip);
+                        List<List<String>> chunks = chunkArray(items, 100);
+
+                        for (int i = 0; i < chunks.size(); i++) {
+                            List<String> chunk = chunks.get(i);
+
+                            if (CastiaUtils.getConfig().devMode) {
+                                CastiaUtils.LOGGER.info("Query tooltip chunk " + (i+1) + "/" + chunks.size());
                             }
-                        } catch (CastiaUtilsException e) {
-                            CastiaUtils.LOGGER.error("Failed to load tooltips: " + e.getMessage());
+                            try {
+                                JsonElement tooltipResponse = RequestService.get("tooltip", chunk.toArray());
+                                Gson gson = new Gson();
+                                List<CachedAdditionalTooltip> tooltipData = new ArrayList<>(Arrays.stream(gson.fromJson(tooltipResponse, CachedAdditionalTooltip[].class)).toList());
+                                for (CachedAdditionalTooltip tooltip : tooltipData) {
+                                    tooltip.setLoaded(true);
+                                    cachedTooltips.put(tooltip.getItem(), tooltip);
+                                }
+                            } catch (CastiaUtilsException e) {
+                                CastiaUtils.LOGGER.error("Failed to load tooltips: " + e.getMessage());
+                            }
                         }
                     }).start();
                 }
             }
         });
+    }
+
+    public static<T> List<List<T>> chunkArray(List<T> elements, int chunkSize) {
+        List<List<T>> chunks = new ArrayList<>();
+        int length = elements.size();
+
+        for (int i = 0; i < length; i += chunkSize) {
+            int end = Math.min(length, i + chunkSize);
+            List<T> chunk = new ArrayList<>(elements.subList(i, end));
+            chunks.add(chunk);
+        }
+
+        return chunks;
     }
 
     private static List<Text> getAdvancedTooltip(ItemStack stack) {

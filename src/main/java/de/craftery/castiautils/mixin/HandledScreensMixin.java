@@ -1,7 +1,6 @@
 package de.craftery.castiautils.mixin;
 
 import de.craftery.castiautils.ah.AhLogger;
-import de.craftery.castiautils.chestshop.ItemShopTooltip;
 import de.craftery.castiautils.chestshop.ShopLogger;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.HandledScreens;
@@ -17,9 +16,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class HandledScreensMixin {
     @Inject(at = @At("TAIL"), method = "open(Lnet/minecraft/screen/ScreenHandlerType;Lnet/minecraft/client/MinecraftClient;ILnet/minecraft/text/Text;)V")
     private static <T extends ScreenHandler> void open(ScreenHandlerType<T> type, MinecraftClient client, int id, Text title, CallbackInfo ci) {
-        ItemShopTooltip.setCurrentInventoryTitle(title.getString());
-
-        ShopLogger.onContainerOpen(id, title);
+        ShopLogger.onContainerOpen(id);
         AhLogger.onContainerOpen(id);
     }
 }

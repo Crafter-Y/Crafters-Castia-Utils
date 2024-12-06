@@ -11,7 +11,6 @@ import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.SignBlockEntity;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.component.Component;
 import net.minecraft.component.DataComponentTypes;
@@ -20,9 +19,11 @@ import net.minecraft.enchantment.Enchantment;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Potion;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.PlainTextContent;
 import net.minecraft.text.Text;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.hit.BlockHitResult;
 import net.minecraft.util.hit.HitResult;
 import net.minecraft.util.math.BlockPos;
@@ -31,6 +32,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -199,16 +201,15 @@ public class ShopLogger {
         return itemId.toString();
     }
 
-    public static void onContainerOpen(int syncId, Text title) {
+    public static void onContainerOpen(int syncId) {
         if (!CastiaUtils.getConfig().chestshopDataCollection) return;
 
-        if (title.getString().length() != 2) return;
-        if (title.getString().charAt(0) != 57344 || title.getString().charAt(1) != 57856) return;
-
-        if ((MinecraftClient.getInstance().currentScreen instanceof GenericContainerScreen containerScreen)) {
-            if(containerScreen.getTitle().getString().length() == 2 && containerScreen.getTitle().getString().charAt(0) == 57344 && containerScreen.getTitle().getString().charAt(1) == 57856) {
-                currentSyncId = syncId;
+        if (ContainerType.getCurrentScreenType() == ContainerType.CHESTSHOP) {
+            if (CastiaUtils.getConfig().devMode) {
+                CastiaUtils.LOGGER.info("Opened chestshop");
             }
+
+            currentSyncId = syncId;
         }
     }
 
@@ -228,6 +229,8 @@ public class ShopLogger {
 
         Offer offer = Offer.getByCoordinate(pos.getX(), pos.getY(), pos.getZ());
 
+        boolean hasChanges = false;
+
         if (offer != null) {
             if (!selectedShop.equals(offer.getShop())) {
                 Shop otherShop = Shop.getByName(offer.getShop());
@@ -238,6 +241,7 @@ public class ShopLogger {
             }
         } else {
             offer = new Offer();
+            hasChanges = true;
         }
 
         float buyPrice;
@@ -279,31 +283,80 @@ public class ShopLogger {
 
         String itemId = getItemId(item);
 
-        offer.setBuyPrice(buyPrice);
-        offer.setSellPrice(sellPrice);
-        offer.setShop(selectedShop);
-        offer.setItem(itemId);
-        offer.setOwner(seller);
-        offer.setDisplay(displayName);
+        if (!Objects.equals(offer.getItem(), itemId)) {
+            offer.setItem(itemId);
+            hasChanges = true;
+        }
+        if (!Objects.equals(offer.getBuyPrice(), buyPrice)) {
+            offer.setBuyPrice(buyPrice);
+            hasChanges = true;
+        }
+        if (!Objects.equals(offer.getSellPrice(), sellPrice)) {
+            offer.setSellPrice(sellPrice);
+            hasChanges = true;
+        }
+        if (!Objects.equals(offer.getShop(), selectedShop)) {
+            offer.setShop(selectedShop);
+            hasChanges = true;
+        }
+        if (!Objects.equals(offer.getOwner(), seller)) {
+            offer.setOwner(seller);
+            hasChanges = true;
+        }
+        if (!Objects.equals(offer.getDisplay(), displayName)) {
+            offer.setDisplay(displayName);
+            hasChanges = true;
+        }
+
         offer.setX(pos.getX());
         offer.setY(pos.getY());
         offer.setZ(pos.getZ());
 
         final Offer offerToSend = SerializationUtils.clone(offer);
-        new Thread(() -> {
-            if (CastiaUtils.getConfig().apiEnabled) {
+
+        MutableText actionBarReport = Text.empty();
+
+        if (hasChanges) {
+            actionBarReport.append(Text.literal("* ").formatted(Formatting.RED));
+        }
+        actionBarReport.append(Text.literal(itemId));
+        actionBarReport.append(Text.literal(" " + selectedShop).formatted(Formatting.AQUA));
+        actionBarReport.append(Text.literal(" ("));
+
+        if (buyPrice > 1_000_000_000) {
+            actionBarReport.append(Text.literal("not buying").formatted(Formatting.GOLD));
+        } else {
+            actionBarReport.append(Text.literal(buyPrice + "").formatted(Formatting.GOLD));
+        }
+
+        actionBarReport.append(Text.literal(", "));
+
+        if (sellPrice == 0) {
+            actionBarReport.append(Text.literal("not selling").formatted(Formatting.GOLD));
+        } else {
+            actionBarReport.append(Text.literal(sellPrice + "").formatted(Formatting.GOLD));
+        }
+
+        actionBarReport.append(Text.literal(")"));
+
+        if (CastiaUtils.getConfig().apiEnabled) {
+            new Thread(() -> {
                 try {
                     RequestService.post("offer", offerToSend.getUniqueIdentifier(), offerToSend);
-                    player.sendMessage(Text.literal(selectedShop + " " + itemId + " (" + buyPrice + ", " + sellPrice + ") (synced)"), true);
+                    actionBarReport.append(Text.literal(" synced").formatted(Formatting.GREEN));
+                    player.sendMessage(actionBarReport, true);
                     AdditionalDataTooltip.invalidateCache(offerToSend.getItem());
                 } catch (CastiaUtilsException e) {
-                    CastiaUtils.LOGGER.error("Sync failed because of: " + e.getMessage());
-                    player.sendMessage(Text.literal(selectedShop + " " + itemId + " (" + buyPrice + ", " + sellPrice + ") (sync failed)"), true);
+                    actionBarReport.append(Text.literal(" not synced").formatted(Formatting.RED));
+                    player.sendMessage(actionBarReport, true);
+                    if (CastiaUtils.getConfig().devMode) {
+                        CastiaUtils.LOGGER.error("Sync failed because of: " + e.getMessage());
+                    }
                 }
-            } else {
-                player.sendMessage(Text.literal(selectedShop + " " + itemId + " (" + buyPrice + ", " + sellPrice + ")"), true);
-            }
-        }).start();
+            }).start();
+        } else {
+            player.sendMessage(actionBarReport, true);
+        }
     }
 
     private static @Nullable Offer getOfferAtPlayer() {
@@ -368,9 +421,9 @@ public class ShopLogger {
                 try {
                     RequestService.post("offer", offer.getUniqueIdentifier(), offer);
                 } catch (CastiaUtilsException e) {
-                    ClientPlayerEntity player = MinecraftClient.getInstance().player;
-                    if (player == null) return;
-                    Messages.sendPlayerMessage(player, "syncFailed", e.getMessage());
+                    if (CastiaUtils.getConfig().devMode) {
+                        CastiaUtils.LOGGER.error("Offer state sync failed because of: " + e.getMessage());
+                    }
                 }
 
                 AdditionalDataTooltip.invalidateCache(offer.getItem());

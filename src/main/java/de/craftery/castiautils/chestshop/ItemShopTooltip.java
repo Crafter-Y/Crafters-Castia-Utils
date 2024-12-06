@@ -2,7 +2,6 @@ package de.craftery.castiautils.chestshop;
 
 import de.craftery.castiautils.CastiaUtils;
 import de.craftery.castiautils.chestshop.relic.RelicPriceEstimation;
-import lombok.Setter;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
@@ -23,16 +22,11 @@ import java.util.List;
 import java.util.Locale;
 
 public class ItemShopTooltip {
-    @Setter
-    private static String currentInventoryTitle = "";
-
     public static boolean shouldHideTooltopBecauseOfContainer() {
         if (MinecraftClient.getInstance().currentScreen instanceof GenericContainerScreen) {
-            return !currentInventoryTitle.isEmpty() &&
-                    (currentInventoryTitle.length() != 2 || currentInventoryTitle.charAt(0) != 57344 || currentInventoryTitle.charAt(1) != 57961) && // don't hide in auctions
-                    !currentInventoryTitle.equals("Town Vault") && // don't hide in town vault
-                    !currentInventoryTitle.startsWith("Vault #") && // don't hide in private vault
-                    (currentInventoryTitle.length() != 2 || currentInventoryTitle.charAt(0) != 57344 || currentInventoryTitle.charAt(1) != 57856); // dont hide in chestshops
+            ContainerType type = ContainerType.getCurrentScreenType();
+
+            return !(type == ContainerType.AUCTION_HOUSE || type == ContainerType.TOWN_VAULT || type == ContainerType.PRIVATE_VAULT || type == ContainerType.CHESTSHOP);
         }
         return false;
     }

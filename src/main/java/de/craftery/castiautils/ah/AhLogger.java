@@ -5,10 +5,9 @@ import de.craftery.castiautils.CastiaUtils;
 import de.craftery.castiautils.CastiaUtilsException;
 import de.craftery.castiautils.api.AdditionalDataTooltip;
 import de.craftery.castiautils.api.RequestService;
+import de.craftery.castiautils.chestshop.ContainerType;
 import de.craftery.castiautils.chestshop.ShopLogger;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.tooltip.TooltipType;
@@ -37,10 +36,12 @@ public class AhLogger {
                         try {
                             RequestService.put("auction", offers.toArray());
                         } catch (CastiaUtilsException e) {
-                            CastiaUtils.LOGGER.error("Auction contribution failed: " + e.getMessage());
+                            if (CastiaUtils.getConfig().devMode) {
+                                CastiaUtils.LOGGER.error("Auction contribution failed: " + e.getMessage());
+                            }
                         }
 
-                        for (AhOffer offer : pendingOffers) {
+                        for (AhOffer offer : offers) {
                             AdditionalDataTooltip.invalidateCache(offer.getItem());
                         }
 
@@ -63,22 +64,25 @@ public class AhLogger {
 
         int linesFound = 0;
         for (Text line : lines) {
-            if (line.getString().contains("-------------------------")) linesFound++;
+            if (line.getString().equals("                                        ") && line.getStyle().isStrikethrough()) linesFound++;
         }
-        if (linesFound != 2) return null;
+        if (linesFound != 1) return null;
 
         for (Text line : lines) {
-            if (line.getString().contains("»") && line.getString().contains("$")) {
+            if (line.getString().startsWith("Price: $")) {
                 Pattern pricePattern = Pattern.compile("\\$(\\d+(,\\d+)*(\\.\\d+)?)");
                 Matcher priceMatcher = pricePattern.matcher(line.getString());
                 if (priceMatcher.find()) {
                     String priceString = priceMatcher.group(1).replaceAll("[,]", "");
                     try {
                         float price = Float.parseFloat(priceString);
-                        return new AhOffer(ShopLogger.getItemId(item), price, item.getCount());
+                        String itemId = ShopLogger.getItemId(item);
+                        return new AhOffer(itemId, price, item.getCount());
                     } catch (NumberFormatException e) {
                         throw new RuntimeException(e);
                     }
+                } else {
+                    CastiaUtils.LOGGER.error("Auction house price tag could not be parsed: " + line.getString());
                 }
             }
         }
@@ -89,11 +93,12 @@ public class AhLogger {
     public static void onContainerOpen(int syncId) {
         if (!CastiaUtils.getConfig().apiEnabled) return;
 
-        if ((MinecraftClient.getInstance().currentScreen instanceof GenericContainerScreen containerScreen)) {
-            String title = containerScreen.getTitle().getString();
-            if (title.length() == 2 && title.charAt(0) == 57344 && title.charAt(1) == 57961) {
-                currentSyncId = syncId;
+        if (ContainerType.getCurrentScreenType() == ContainerType.AUCTION_HOUSE) {
+            if (CastiaUtils.getConfig().devMode) {
+                CastiaUtils.LOGGER.info("Auction house opened");
             }
+
+            currentSyncId = syncId;
         }
     }
 
