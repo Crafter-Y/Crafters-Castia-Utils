@@ -47,8 +47,8 @@ public class Adblocker {
                 return config.firstJoinMessage;
             } else if (handleRankupMessage(message)) {
                 return config.rankupMessage;
-            } else if (handleRessourcePackMessage(message)) {
-                return config.ressourcePackMessage;
+            } else if (handleResourcePackMessage(message)) {
+                return config.resourcePackMessage;
             } else if (handleDeathMessage(message)) {
                 return config.deathMessage;
             } else if (handleAfkMessage(message)) {
@@ -190,7 +190,7 @@ public class Adblocker {
         return message.getSiblings().get(1).getString().endsWith("ranked up to ");
     }
 
-    private static boolean handleRessourcePackMessage(Text message) {
+    private static boolean handleResourcePackMessage(Text message) {
         if (!message.getSiblings().isEmpty()) return false;
         return message.getString().equals("Resource pack successfully loaded.");
     }

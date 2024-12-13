@@ -40,7 +40,7 @@ public class CastiaConfig implements ConfigData {
 
     @ConfigEntry.Category("adblock")
     @ConfigEntry.Gui.Tooltip
-    public boolean ressourcePackMessage = false;
+    public boolean resourcePackMessage = false;
 
     @ConfigEntry.Category("adblock")
     public boolean deathMessage = true;
