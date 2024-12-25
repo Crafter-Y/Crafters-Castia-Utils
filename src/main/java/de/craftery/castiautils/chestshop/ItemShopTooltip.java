@@ -125,6 +125,15 @@ public class ItemShopTooltip {
             if (CastiaUtils.getConfig().enableEstimateRelicPrices) {
                 RelicPriceEstimation.estimateItemValue(stack, lines);
             }
+
+            if (type == TooltipType.ADVANCED) {
+                for (Text line : lines) {
+                    String minecraftId = "minecraft:" + stack.getItem().getTranslationKey().split("\\.")[2];
+                    if (line.getString().equals(minecraftId) && line instanceof MutableText mut) {
+                        mut.append(Text.literal("\n"+itemId));
+                    }
+                }
+            }
         });
     }
 }
