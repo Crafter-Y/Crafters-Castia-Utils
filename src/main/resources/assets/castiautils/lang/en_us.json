@@ -79,7 +79,9 @@
   "text.autoconfig.castiautils.option.enableTooltipInfo": "Enable tooltip info",
   "text.autoconfig.castiautils.option.enableTooltipInfo.@Tooltip": "This option embeds stack/buy/sell prices into every item tooltip.",
   "text.autoconfig.castiautils.option.queryAdditionalTooltip": "Query additional tooltip",
-  "text.autoconfig.castiautils.option.queryAdditionalTooltip.@Tooltip": "Embed action and offer min/l25/avg/med/h25/max into every item tooltip.",
+  "text.autoconfig.castiautils.option.queryAdditionalTooltip.@Tooltip": "Show buy/sell and last auction price in item tooltip",
+  "text.autoconfig.castiautils.option.displayComplexPriceMatrix": "Display complex price matrix",
+  "text.autoconfig.castiautils.option.displayComplexPriceMatrix.@Tooltip": "Show min/l25/avg/med/h25/max for buy/sell prices",
 
   "text.autoconfig.castiautils.category.relic": "Relics",
   "text.autoconfig.castiautils.option.enableEstimateRelicPrices": "Enable relic price estimation",

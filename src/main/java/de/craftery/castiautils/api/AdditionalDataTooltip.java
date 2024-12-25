@@ -6,6 +6,7 @@ import de.craftery.castiautils.CastiaUtils;
 import de.craftery.castiautils.CastiaUtilsException;
 import de.craftery.castiautils.chestshop.ItemShopTooltip;
 import de.craftery.castiautils.chestshop.ShopLogger;
+import de.craftery.castiautils.config.CastiaConfig;
 import lombok.Data;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.item.v1.ItemTooltipCallback;
@@ -117,62 +118,43 @@ public class AdditionalDataTooltip {
 
         if (cache.hasBuyOfferData() || cache.hasSellOfferData() || cache.hasAuctionData()) {
             tooltip.add(Text.literal(" "));
-            MutableText descriptor = Text.literal("          Min").formatted(Formatting.GOLD)
-                    .append(Text.literal("/").formatted(Formatting.DARK_GRAY))
-                    .append(Text.literal("l25").formatted(Formatting.GOLD))
-                    .append(Text.literal("/").formatted(Formatting.DARK_GRAY))
-                    .append(Text.literal("Avg").formatted(Formatting.GREEN))
-                    .append(Text.literal("/").formatted(Formatting.DARK_GRAY))
-                    .append(Text.literal("Med").formatted(Formatting.RED))
-                    .append(Text.literal("/").formatted(Formatting.DARK_GRAY))
-                    .append(Text.literal("u25").formatted(Formatting.GOLD))
-                    .append(Text.literal("/").formatted(Formatting.DARK_GRAY))
-                    .append(Text.literal("Max").formatted(Formatting.GOLD));
+            MutableText descriptor = formatPriceRow("          ",
+                    "Min",
+                    "l25",
+                    "Avg",
+                    "Med",
+                    "u25",
+                    "Max");
             tooltip.add(descriptor);
         }
         if (cache.hasBuyOfferData()) {
-            MutableText buyOffer =Text.literal("Buy     ").formatted(Formatting.GRAY)
-                    .append(Text.literal(df.format(cache.minBuyOffer)).formatted(Formatting.GOLD))
-                    .append(Text.literal("/").formatted(Formatting.DARK_GRAY))
-                    .append(Text.literal(df.format(cache.l25BuyOffer)).formatted(Formatting.GOLD))
-                    .append(Text.literal("/").formatted(Formatting.DARK_GRAY))
-                    .append(Text.literal(df.format(cache.avgBuyOffer)).formatted(Formatting.GREEN))
-                    .append(Text.literal("/").formatted(Formatting.DARK_GRAY))
-                    .append(Text.literal(df.format(cache.medBuyOffer)).formatted(Formatting.RED))
-                    .append(Text.literal("/").formatted(Formatting.DARK_GRAY))
-                    .append(Text.literal(df.format(cache.u25BuyOffer)).formatted(Formatting.GOLD))
-                    .append(Text.literal("/").formatted(Formatting.DARK_GRAY))
-                    .append(Text.literal(df.format(cache.maxBuyOffer)).formatted(Formatting.GOLD));
+            MutableText buyOffer = formatPriceRow("Buy     ",
+                    df.format(cache.minBuyOffer),
+                    df.format(cache.l25BuyOffer),
+                    df.format(cache.avgBuyOffer),
+                    df.format(cache.medBuyOffer),
+                    df.format(cache.u25BuyOffer),
+                    df.format(cache.maxBuyOffer));
             tooltip.add(buyOffer);
         }
         if (cache.hasSellOfferData()) {
-            MutableText sellOffer = Text.literal("Sell     ").formatted(Formatting.GRAY)
-                    .append(Text.literal(df.format(cache.minSellOffer)).formatted(Formatting.GOLD))
-                    .append(Text.literal("/").formatted(Formatting.DARK_GRAY))
-                    .append(Text.literal(df.format(cache.l25SellOffer)).formatted(Formatting.GOLD))
-                    .append(Text.literal("/").formatted(Formatting.DARK_GRAY))
-                    .append(Text.literal(df.format(cache.avgSellOffer)).formatted(Formatting.GREEN))
-                    .append(Text.literal("/").formatted(Formatting.DARK_GRAY))
-                    .append(Text.literal(df.format(cache.medSellOffer)).formatted(Formatting.RED))
-                    .append(Text.literal("/").formatted(Formatting.DARK_GRAY))
-                    .append(Text.literal(df.format(cache.u25SellOffer)).formatted(Formatting.GOLD))
-                    .append(Text.literal("/").formatted(Formatting.DARK_GRAY))
-                    .append(Text.literal(df.format(cache.maxSellOffer)).formatted(Formatting.GOLD));
+            MutableText sellOffer = formatPriceRow("Sell     ",
+                    df.format(cache.minSellOffer),
+                    df.format(cache.l25SellOffer),
+                    df.format(cache.avgSellOffer),
+                    df.format(cache.medSellOffer),
+                    df.format(cache.u25SellOffer),
+                    df.format(cache.maxSellOffer));
             tooltip.add(sellOffer);
         }
         if (cache.hasAuctionData()) {
-            MutableText auctions = Text.literal("Auction ").formatted(Formatting.GRAY)
-                    .append(Text.literal(df.format(cache.minAuction)).formatted(Formatting.GOLD))
-                    .append(Text.literal("/").formatted(Formatting.DARK_GRAY))
-                    .append(Text.literal(df.format(cache.l25Auction)).formatted(Formatting.GOLD))
-                    .append(Text.literal("/").formatted(Formatting.DARK_GRAY))
-                    .append(Text.literal(df.format(cache.avgAuction)).formatted(Formatting.GREEN))
-                    .append(Text.literal("/").formatted(Formatting.DARK_GRAY))
-                    .append(Text.literal(df.format(cache.medAuction)).formatted(Formatting.RED))
-                    .append(Text.literal("/").formatted(Formatting.DARK_GRAY))
-                    .append(Text.literal(df.format(cache.u25Auction)).formatted(Formatting.GOLD))
-                    .append(Text.literal("/").formatted(Formatting.DARK_GRAY))
-                    .append(Text.literal(df.format(cache.maxAuction)).formatted(Formatting.GOLD));
+            MutableText auctions = formatPriceRow("Auction ",
+                    df.format(cache.minAuction),
+                    df.format(cache.l25Auction),
+                    df.format(cache.avgAuction),
+                    df.format(cache.medAuction),
+                    df.format(cache.u25Auction),
+                    df.format(cache.maxAuction));
             tooltip.add(auctions);
 
             if(cache.lastAuctionPrice != null || cache.lastAuctionAmount != null) {
@@ -190,6 +172,31 @@ public class AdditionalDataTooltip {
         }
 
         return tooltip;
+    }
+
+    private static MutableText formatPriceRow(String prefix, String min, String l25, String avg, String med, String u25, String max) {
+        MutableText text = Text.literal(prefix).formatted(Formatting.GRAY)
+                .append(Text.literal(min).formatted(Formatting.GOLD))
+                .append(Text.literal("/").formatted(Formatting.DARK_GRAY));
+        CastiaConfig config = CastiaUtils.getConfig();
+        if (config.displayComplexPriceMatrix) {
+            text.append(Text.literal(l25).formatted(Formatting.GOLD))
+                    .append(Text.literal("/").formatted(Formatting.DARK_GRAY))
+                    .append(Text.literal(avg).formatted(Formatting.GREEN))
+                    .append(Text.literal("/").formatted(Formatting.DARK_GRAY));
+        }
+
+        text.append(Text.literal(med).formatted(Formatting.RED))
+                .append(Text.literal("/").formatted(Formatting.DARK_GRAY));
+
+        if (config.displayComplexPriceMatrix) {
+            text.append(Text.literal(u25).formatted(Formatting.GOLD))
+                    .append(Text.literal("/").formatted(Formatting.DARK_GRAY));
+        }
+
+        text.append(Text.literal(max).formatted(Formatting.GOLD));
+
+        return text;
     }
 
     private static String relativeTimeDifferenceStringFromUnix(Long unix) {

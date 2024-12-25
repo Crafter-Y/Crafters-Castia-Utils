@@ -101,6 +101,9 @@ public class CastiaConfig implements ConfigData {
     @ConfigEntry.Gui.Tooltip
     public boolean queryAdditionalTooltip = true;
 
+    @ConfigEntry.Category("tooltips")
+    @ConfigEntry.Gui.Tooltip
+    public boolean displayComplexPriceMatrix = false;
 
     // Relic Price estimation --------------------------------------------------------------------->>>>
     @ConfigEntry.Category("relic")
