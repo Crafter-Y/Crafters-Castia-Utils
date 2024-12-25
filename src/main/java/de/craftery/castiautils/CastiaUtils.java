@@ -9,8 +9,11 @@ import de.craftery.castiautils.config.CastiaConfig;
 import me.shedaniel.autoconfig.AutoConfig;
 import me.shedaniel.autoconfig.serializer.JanksonConfigSerializer;
 import net.fabricmc.api.ModInitializer;
+import net.minecraft.client.MinecraftClient;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import java.util.Locale;
 
 public class CastiaUtils implements ModInitializer {
     public static final Logger LOGGER = LogManager.getLogger("castiautils");
@@ -45,5 +48,14 @@ public class CastiaUtils implements ModInitializer {
         } catch (CastiaUtilsException e) {
             CastiaUtils.LOGGER.error(e.getMessage());
         }
+    }
+
+    public static Locale getMinecraftLocale() {
+        MinecraftClient client = MinecraftClient.getInstance();
+
+        String languageCode = client.getLanguageManager().getLanguage();
+
+        String bcp47LanguageTag = languageCode.replace("_", "-"); // "en_us" → "en-US"
+        return Locale.forLanguageTag(bcp47LanguageTag);
     }
 }

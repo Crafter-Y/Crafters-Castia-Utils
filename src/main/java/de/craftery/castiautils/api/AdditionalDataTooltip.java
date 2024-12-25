@@ -16,10 +16,13 @@ import net.minecraft.item.tooltip.TooltipType;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.time4j.PrettyTime;
 
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.*;
 
 public class AdditionalDataTooltip {
@@ -180,12 +183,20 @@ public class AdditionalDataTooltip {
                         .append(Text.literal(" (").formatted(Formatting.GRAY))
                         .append(Text.literal("$" + df.format(cache.lastAuctionPrice/cache.lastAuctionAmount)).formatted(Formatting.GOLD))
                         .append(Text.literal("/pc").formatted(Formatting.DARK_GRAY))
-                        .append(Text.literal(")").formatted(Formatting.GRAY));
+                        .append(Text.literal(")").formatted(Formatting.GRAY))
+                                .append(Text.literal(" " + relativeTimeDifferenceStringFromUnix(cache.lastAuctionUnix)).formatted(Formatting.DARK_GRAY));
                 tooltip.add(lastAuction);
             }
         }
 
         return tooltip;
+    }
+
+    private static String relativeTimeDifferenceStringFromUnix(Long unix) {
+        Locale userLocale = CastiaUtils.getMinecraftLocale();
+        PrettyTime prettyTime = PrettyTime.of(userLocale);
+
+        return prettyTime.printRelative(Instant.ofEpochSecond(unix / 1000), ZoneId.of("UTC"));
     }
 
     public static void invalidateCache(String itemId) {
