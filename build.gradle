@@ -73,15 +73,14 @@ dependencies {
     modCompileOnly "red.jackf:whereisit:${project.whereisit_version}"
     modImplementation "red.jackf:chesttracker:${project.chest_tracker_version}"
 
-
     modCompileOnly "me.shedaniel:RoughlyEnoughItems-api-fabric:${project.rei_version}"
     modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-fabric:${project.rei_version}"
 
     modImplementation "curse.maven:jade-324717:${project.jade_id}"
 
-    implementation "blue.endless:jankson:1.2.3"
-    implementation 'com.google.code.gson:gson:2.11.0'
-    implementation 'net.time4j:time4j-core:4.38'
+    implementation include("blue.endless:jankson:1.2.3")
+    implementation include('com.google.code.gson:gson:2.11.0')
+    implementation include('net.time4j:time4j-core:4.38')
 
     compileOnly 'org.projectlombok:lombok:1.18.34'
     annotationProcessor 'org.projectlombok:lombok:1.18.34'
